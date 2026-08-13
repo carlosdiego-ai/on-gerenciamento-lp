@@ -81,17 +81,77 @@
     document.body.appendChild(progresso);
   }
 
+  /* ---------------------------------------------------------------------
+     A PLANTA QUE SE CONSTRÓI
+     Cada etapa da obra ocupa uma faixa da rolagem. Dentro da sua faixa,
+     os traços daquela etapa vão sendo desenhados do zero até o fim.
+     --------------------------------------------------------------------- */
+  var etapas = [];
+  (function prepararPlanta() {
+    var svg = $('.blueprint__svg');
+    if (!svg) { return; }
+
+    // Sem animação: entrega a planta inteira desenhada.
+    if (CONFIG.reduzirMovimento) { return; }
+
+    $$('[data-etapa]', svg).forEach(function (grupo) {
+      var tracos = $$('path, circle', grupo).filter(function (el) {
+        return el.getAttribute('fill') !== 'currentColor';
+      }).map(function (el) {
+        var L = 0;
+        try { L = el.getTotalLength(); } catch (e) { L = 0; }
+        if (!L) { return null; }
+        el.style.strokeDasharray = L;
+        el.style.strokeDashoffset = L;
+        return { el: el, L: L };
+      }).filter(Boolean);
+
+      // as setas de cota são preenchidas, então só recebem opacidade
+      var solidos = $$('[fill="currentColor"]', grupo);
+      solidos.forEach(function (el) { el.style.opacity = 0; });
+
+      if (tracos.length || solidos.length) {
+        etapas.push({ tracos: tracos, solidos: solidos });
+      }
+    });
+  })();
+
+  function desenharPlanta(progresso01) {
+    if (!etapas.length) { return; }
+    var n = etapas.length;
+    // A obra sobe entre 4% e 92% da página, para começar e terminar com folga.
+    var p = (progresso01 - 0.04) / 0.88;
+    p = Math.max(0, Math.min(1, p));
+
+    etapas.forEach(function (etapa, i) {
+      var ini = i / n;
+      var t = (p - ini) * n;              // 0 a 1 dentro da faixa da etapa
+      t = Math.max(0, Math.min(1, t));
+      // suaviza o fim de cada traço
+      var e = 1 - Math.pow(1 - t, 3);
+      etapa.tracos.forEach(function (tr) {
+        tr.el.style.strokeDashoffset = tr.L * (1 - e);
+      });
+      etapa.solidos.forEach(function (el) { el.style.opacity = e; });
+    });
+  }
+
+  // Exposto para inspeção: ONPlanta.desenhar(0) a ONPlanta.desenhar(1)
+  // permite conferir cada etapa da obra sem precisar rolar a página.
+  window.ONPlanta = { desenhar: desenharPlanta, etapas: etapas };
+
   var ticking = false;
   function aoRolar() {
     var y = window.scrollY || window.pageYOffset;
 
     if (header) { header.classList.toggle('is-scrolled', y > 40); }
 
-    if (progresso) {
-      var total = document.documentElement.scrollHeight - window.innerHeight;
-      var razao = total > 0 ? Math.min(y / total, 1) : 0;
-      progresso.style.transform = 'scaleX(' + razao + ')';
-    }
+    var total = document.documentElement.scrollHeight - window.innerHeight;
+    var razao = total > 0 ? Math.min(y / total, 1) : 0;
+
+    if (progresso) { progresso.style.transform = 'scaleX(' + razao + ')'; }
+    desenharPlanta(razao);
+
     ticking = false;
   }
   window.addEventListener('scroll', function () {

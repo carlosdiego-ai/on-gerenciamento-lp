@@ -135,3 +135,40 @@ Base de 4px. Raio de 8 a 30px. O raio grande é o que dá o ar contemporâneo da
 ---
 
 Estratégia, copy e construção: Croma.
+
+---
+
+## 7. O fundo que se constrói
+
+O fundo não é chapado: tem duas camadas.
+
+**Malha técnica.** O `.shell` recebe um papel milimetrado de 56px em bronze a 4,5% de opacidade, mais um brilho radial no topo. Dá textura de prancheta sem competir com o texto.
+
+**A planta progressiva.** Uma elevação arquitetônica em traço de blueprint, fixa no fundo da viewport, que vai sendo desenhada conforme a pessoa rola a página. São 8 etapas na ordem real de uma obra:
+
+| Etapa | O que aparece | Faixa da rolagem |
+|---|---|---|
+| 1 | Terreno, linha do solo e eixos | 4% a 15% |
+| 2 | Sapatas e baldrame, com hachura | 15% a 26% |
+| 3 | Pilares do térreo | 26% a 37% |
+| 4 | Laje do térreo | 37% a 48% |
+| 5 | Pavimento superior | 48% a 59% |
+| 6 | Cobertura com beiral | 59% a 70% |
+| 7 | Esquadrias e vãos de vidro | 70% a 81% |
+| 8 | Cotas, norte e paisagismo | 81% a 92% |
+
+Quem chega no formulário vê a casa pronta. É a promessa da página contada em desenho.
+
+**Como funciona:** cada traço tem `stroke-dasharray` igual ao próprio comprimento e o `stroke-dashoffset` é interpolado pelo progresso da rolagem, dentro do `requestAnimationFrame` que já controlava o header e a barra de progresso. Nenhum listener novo.
+
+**Para ajustar sem rolar a página**, abra o console e chame:
+
+```js
+ONPlanta.desenhar(0)     // terreno limpo
+ONPlanta.desenhar(0.5)   // metade da obra
+ONPlanta.desenhar(1)     // casa pronta
+```
+
+**Para editar o desenho:** o SVG está inline no `index.html`, logo depois de `<div class="shell">`. Cada etapa é um `<g data-etapa="...">`. Acrescentar ou remover grupos muda automaticamente o número de faixas, o JS se adapta.
+
+No celular a planta cai para 16% de opacidade e alarga, para virar textura em vez de desenho. Com `prefers-reduced-motion` ela aparece inteira, sem animar. Na impressão, some.
