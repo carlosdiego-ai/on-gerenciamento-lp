@@ -449,39 +449,43 @@
   </div>
 </section>
 
-<!-- ===================== PORTFÓLIO ===================== -->
+<!-- ===================== PORTFÓLIO / INSTAGRAM ===================== -->
 <section class="section" id="obras">
   <div class="wrap">
     <div class="head--split">
       <div>
-        <span class="pill">Portfólio</span>
-        <h2 class="h2">Obras que refletem <em>nosso padrão de gestão.</em></h2>
+        <span class="pill">Obras e bastidores</span>
+        <h2 class="h2">O que sai <em>das nossas mãos.</em></h2>
       </div>
-      <p class="lead">Orçamento fechado antes de começar e acompanhamento até a entrega das chaves.</p>
+      <p class="lead">Acompanhe as obras em andamento e as entregas no nosso Instagram.</p>
+    </div>
+  </div>
+
+  <!-- O carrossel sangra até a borda para indicar que há mais conteúdo ao lado -->
+  <div class="carrossel" role="region" aria-roledescription="carrossel"
+       aria-label="Publicações da ON no Instagram" id="feedON">
+    <div class="carrossel__track" id="feedTrack" tabindex="0" aria-live="polite">
+      <!-- preenchido por assets/app.js a partir de CONFIG.instagram -->
     </div>
 
-    <div class="works">
-      <article class="work reveal">
-        <div class="work__ph"><span>Foto: fachada finalizada</span></div>
-        <h3>Residência em Adamantina</h3>
-        <div class="work__meta"><span>informar m²</span><span>informar prazo</span></div>
-      </article>
-      <article class="work reveal">
-        <div class="work__ph"><span>Foto: fachada finalizada</span></div>
-        <h3>Residência em condomínio</h3>
-        <div class="work__meta"><span>informar m²</span><span>informar prazo</span></div>
-      </article>
-      <article class="work reveal">
-        <div class="work__ph"><span>Foto: área externa entregue</span></div>
-        <h3>Obra comercial</h3>
-        <div class="work__meta"><span>informar m²</span><span>informar prazo</span></div>
-      </article>
-      <article class="work reveal">
-        <div class="work__ph"><span>Foto: interior entregue</span></div>
-        <h3>Residência na região</h3>
-        <div class="work__meta"><span>informar m²</span><span>informar prazo</span></div>
-      </article>
+    <div class="wrap carrossel__ui">
+      <div class="carrossel__dots" id="feedDots" role="tablist" aria-label="Escolher publicação"></div>
+      <div class="carrossel__nav">
+        <button class="cbtn" type="button" id="feedPrev" aria-label="Publicação anterior">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button class="cbtn" type="button" id="feedNext" aria-label="Próxima publicação">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
     </div>
+  </div>
+
+  <div class="wrap center" style="margin-top:var(--sp-7)">
+    <a class="btn btn--ghost" href="https://www.instagram.com/ongerenciamento/" target="_blank" rel="noopener" data-cta="instagram">
+      Ver tudo no Instagram
+      <span class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
+    </a>
   </div>
 </section>
 

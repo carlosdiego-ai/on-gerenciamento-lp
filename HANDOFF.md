@@ -203,3 +203,56 @@ A primeira versão tinha texto demais para uma página de captação. Medi e cor
 - Mais respiro entre o cabeçalho de cada seção e o conteúdo dela.
 
 Critério usado para decidir o que cortar: se a frase não muda a decisão de preencher o formulário, ela sai. O que sobrou é específico e verificável, no lugar de adjetivo.
+
+---
+
+## 9. Carrossel de obras e Instagram
+
+A seção de portfólio virou um carrossel que passa sozinho.
+
+### Como trocar o conteúdo
+
+Abra `assets/app.js` e edite a lista `CONFIG.instagram`. Cada item aceita:
+
+| Campo | Para que serve |
+|---|---|
+| `foto` | Caminho da imagem em `assets/img/`. Vazio mostra a moldura de espera com o nome da foto que falta |
+| `titulo` | Nome da obra ou do conteúdo |
+| `texto` | Uma linha de contexto |
+| `tipo` | Rótulo do canto: Obra entregue, Bastidor, Reels |
+| `link` | Endereço do post no Instagram. Com link, o card vira clicável |
+
+Para publicar uma foto real: coloque o arquivo em `assets/img/`, de preferência em 4:5 e abaixo de 300 KB, e aponte o campo `foto`.
+
+### Comportamento
+
+Rolagem nativa com scroll-snap, então **arrastar com o dedo funciona mesmo sem JavaScript**. O JavaScript acrescenta as setas, os indicadores, a navegação por teclado com as setas do teclado e o avanço automático a cada 5,2 segundos.
+
+O avanço pausa sozinho quando o ponteiro entra, quando algum elemento recebe foco, ao tocar na tela e quando a aba fica em segundo plano. Com `prefers-reduced-motion` o avanço não liga.
+
+Os indicadores seguem as **posições de parada**, não a quantidade de slides. Com 6 slides e 3 visíveis no desktop existem 4 paradas reais, então aparecem 4 indicadores. No tablet aparecem 5. Eles se refazem sozinhos quando a janela muda de largura.
+
+Para ajustar ou desligar o avanço automático, mude `CONFIG.feedAutoplay`. O valor é em milissegundos e `0` desliga.
+
+### Sobre puxar o Instagram automaticamente
+
+Não é possível hoje sem credencial. A Basic Display API foi desligada pela Meta no fim de 2024, e a Graph API exige conta Instagram Business vinculada a uma página do Facebook, um app no Meta for Developers e um token de longa duração renovado a cada 60 dias. Raspar o site quebra em semanas e arrisca bloqueio.
+
+O código já está preparado. Quando existir um endereço que devolva os posts em JSON, basta acrescentar em `CONFIG`:
+
+```js
+feedEndpoint: 'https://seu-endpoint/instagram'
+```
+
+A função `carregarFeed()` consome o formato padrão da Graph API, com os campos `media_url`, `thumbnail_url`, `caption`, `media_type` e `permalink`. Se o endereço falhar ou devolver vazio, ela cai de volta na lista local sem quebrar a página.
+
+O endereço precisa ser um intermediário seu, não a Meta direto, porque o token nunca pode ficar exposto no navegador.
+
+### Para inspecionar
+
+```js
+ONCarrossel.total()      // quantos slides
+ONCarrossel.atual()      // posição atual
+ONCarrossel.irPara(2)    // vai para a terceira parada
+ONCarrossel.parar()      // desliga o avanço automático
+```

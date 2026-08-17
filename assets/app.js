@@ -13,7 +13,31 @@
     // Celular brasileiro tem 13 dígitos: 55 + DDD + 9 + número.
     whatsapp: '5518000000000',            // PENDENTE: número real da ON
     endpoint: '',                          // opcional: URL que recebe o lead por POST
-    reduzirMovimento: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    reduzirMovimento: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+
+    /* -------------------------------------------------------------------
+       CARROSSEL DE OBRAS E INSTAGRAM
+
+       Para trocar o conteúdo, edite a lista abaixo. Cada item aceita:
+         foto    caminho da imagem em assets/img/ (deixe vazio para
+                 aparecer a moldura de espera com a legenda de orientação)
+         titulo  nome da obra ou do conteúdo
+         texto   uma linha curta de contexto
+         tipo    rótulo do canto superior (Obra entregue, Reels, Bastidor)
+         link    endereço do post no Instagram (opcional)
+
+       Para puxar o feed automaticamente no futuro, veja a função
+       carregarFeed() mais abaixo.
+       ------------------------------------------------------------------- */
+    instagram: [
+      { foto:'', titulo:'Residência em Adamantina', texto:'Do terreno à entrega das chaves, com cronograma cumprido.', tipo:'Obra entregue', link:'' },
+      { foto:'', titulo:'Concretagem da laje',      texto:'Acompanhamento técnico em cada etapa crítica da estrutura.', tipo:'Bastidor', link:'' },
+      { foto:'', titulo:'Residência em condomínio', texto:'Alto padrão com acabamento conferido serviço a serviço.', tipo:'Obra entregue', link:'' },
+      { foto:'', titulo:'Visita técnica semanal',   texto:'O relatório que chega para o cliente sai daqui.', tipo:'Bastidor', link:'' },
+      { foto:'', titulo:'Obra comercial',           texto:'Prazo e custo definidos antes da primeira pedra.', tipo:'Obra entregue', link:'' },
+      { foto:'', titulo:'Detalhe de acabamento',    texto:'O padrão se mantém porque alguém confere.', tipo:'Reels', link:'' }
+    ],
+    feedAutoplay: 5200                     // ms entre trocas. 0 desliga.
   };
 
   var $ = function (s, ctx) { return (ctx || document).querySelector(s); };
@@ -209,6 +233,227 @@
       track('InitiateCheckout', { origem: el.getAttribute('data-cta') });
     });
   });
+
+  /* ---------------------------------------------------------------------
+     CARROSSEL DE OBRAS E INSTAGRAM
+
+     A rolagem é nativa com scroll-snap, então arrastar com o dedo já
+     funciona sem JavaScript. O que segue acrescenta setas, indicadores,
+     navegação por teclado e avanço automático.
+     --------------------------------------------------------------------- */
+  (function carrossel() {
+    var track = $('#feedTrack');
+    if (!track) { return; }
+
+    var dots = $('#feedDots');
+    var prev = $('#feedPrev');
+    var next = $('#feedNext');
+
+    function esc(t) {
+      return String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function montarSlide(item, i) {
+      var temFoto = item.foto && item.foto.trim();
+      var midia = temFoto
+        ? '<img src="' + esc(item.foto) + '" alt="' + esc(item.titulo) + '" loading="lazy" decoding="async">'
+        : '<div class="slide__ph"><span>Foto: ' + esc(item.titulo) + '</span></div>';
+
+      var interno =
+        '<div class="slide__media">' + midia + '</div>' +
+        (item.tipo ? '<span class="slide__tipo">' + esc(item.tipo) + '</span>' : '') +
+        '<div class="slide__cap"><b>' + esc(item.titulo) + '</b><p>' + esc(item.texto) + '</p></div>';
+
+      var el;
+      if (item.link) {
+        el = document.createElement('a');
+        el.href = item.link;
+        el.target = '_blank';
+        el.rel = 'noopener';
+        el.setAttribute('aria-label', item.titulo + ', abrir no Instagram');
+      } else {
+        el = document.createElement('div');
+      }
+      el.className = 'slide';
+      el.setAttribute('role', 'group');
+      el.setAttribute('aria-roledescription', 'slide');
+      el.setAttribute('aria-label', (i + 1) + ' de ' + CONFIG.instagram.length);
+      el.innerHTML = interno;
+      return el;
+    }
+
+    function render(lista) {
+      track.innerHTML = '';
+      lista.forEach(function (item, i) { track.appendChild(montarSlide(item, i)); });
+      montarDots();
+    }
+
+    // os indicadores dependem de quantos slides cabem na tela,
+    // então são refeitos quando a largura muda
+    function montarDots() {
+      var total = paradas().length;
+      if (dots.childElementCount === total) { return; }
+      dots.innerHTML = '';
+      for (var i = 0; i < total; i++) {
+        (function (k) {
+          var d = document.createElement('button');
+          d.type = 'button';
+          d.className = 'cdot';
+          d.setAttribute('role', 'tab');
+          d.setAttribute('aria-label', 'Posição ' + (k + 1) + ' de ' + total);
+          d.setAttribute('aria-selected', k === 0 ? 'true' : 'false');
+          d.addEventListener('click', function () { irPara(k); parar(); });
+          dots.appendChild(d);
+        })(i);
+      }
+    }
+
+    function slides() { return $$('.slide', track); }
+
+    /* O ponto de ancoragem muda com o scroll-snap-align: no desktop os
+       slides encostam à esquerda, no celular ficam centralizados. Calcular
+       sempre pelo centro faria o carrossel pular slides. */
+    function ancora(el) {
+      var alinha = getComputedStyle(el).scrollSnapAlign || 'start';
+      if (alinha.indexOf('center') >= 0) {
+        return (track.clientWidth - el.offsetWidth) / 2;
+      }
+      var cs = getComputedStyle(track);
+      return parseFloat(cs.scrollPaddingInlineStart || cs.scrollPaddingLeft) || 0;
+    }
+
+    function scrollMax() { return Math.max(0, track.scrollWidth - track.clientWidth); }
+
+    // posição de rolagem que deixa este slide alinhado, sem passar do fim
+    function destino(el) {
+      var delta = el.getBoundingClientRect().left - track.getBoundingClientRect().left;
+      var alvo = Math.round(track.scrollLeft + delta - ancora(el));
+      return Math.max(0, Math.min(alvo, scrollMax()));
+    }
+
+    /* Com vários slides visíveis por vez, o número de posições reais de
+       parada é menor que o de slides: os últimos compartilham o fim da
+       rolagem. Os indicadores seguem as paradas, não os slides, senão os
+       últimos nunca ficariam ativos. */
+    function paradas() {
+      var lista = [];
+      slides().forEach(function (el) {
+        var d = destino(el);
+        if (!lista.length || d - lista[lista.length - 1] > 4) { lista.push(d); }
+      });
+      if (!lista.length) { return [0]; }
+      var max = scrollMax();
+      if (max - lista[lista.length - 1] > 4) { lista.push(max); }
+      return lista;
+    }
+
+    function atual() {
+      var p = paradas();
+      var melhor = 0, dist = Infinity;
+      p.forEach(function (v, i) {
+        var d = Math.abs(v - track.scrollLeft);
+        if (d < dist) { dist = d; melhor = i; }
+      });
+      return melhor;
+    }
+
+    function irPara(i) {
+      var p = paradas();
+      var alvo = p[Math.max(0, Math.min(i, p.length - 1))];
+      track.scrollTo({ left: alvo, behavior: CONFIG.reduzirMovimento ? 'auto' : 'smooth' });
+    }
+
+    function sincronizar() {
+      var i = atual();
+      $$('.cdot', dots).forEach(function (d, k) {
+        d.setAttribute('aria-selected', k === i ? 'true' : 'false');
+      });
+      if (prev) { prev.disabled = track.scrollLeft <= 4; }
+      if (next) { next.disabled = track.scrollLeft >= scrollMax() - 4; }
+    }
+
+    // largura mudou: número de slides visíveis muda, indicadores refeitos
+    var redim = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(redim);
+      redim = setTimeout(function () { montarDots(); sincronizar(); }, 180);
+    }, { passive: true });
+
+    var timer = null;
+    function parar() { if (timer) { clearInterval(timer); timer = null; } }
+    function tocar() {
+      if (CONFIG.reduzirMovimento || !CONFIG.feedAutoplay) { return; }
+      parar();
+      timer = setInterval(function () {
+        if (document.hidden) { return; }
+        var s = slides();
+        var i = atual();
+        // no fim, volta ao começo
+        irPara(track.scrollLeft + track.clientWidth >= track.scrollWidth - 4 ? 0 : Math.min(i + 1, s.length - 1));
+      }, CONFIG.feedAutoplay);
+    }
+
+    if (prev) { prev.addEventListener('click', function () { irPara(Math.max(atual() - 1, 0)); parar(); }); }
+    if (next) { next.addEventListener('click', function () { irPara(atual() + 1); parar(); }); }
+
+    track.addEventListener('scroll', function () {
+      window.requestAnimationFrame(sincronizar);
+    }, { passive: true });
+
+    // teclado: setas navegam quando o carrossel tem foco
+    track.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); irPara(atual() + 1); parar(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); irPara(Math.max(atual() - 1, 0)); parar(); }
+    });
+
+    // pausa quando o ponteiro ou o foco está dentro
+    ['mouseenter', 'focusin', 'touchstart'].forEach(function (ev) {
+      track.addEventListener(ev, parar, { passive: true });
+    });
+    ['mouseleave', 'focusout'].forEach(function (ev) {
+      track.addEventListener(ev, tocar);
+    });
+
+    /* Ponto de integração com a Graph API da Meta.
+       Enquanto CONFIG.feedEndpoint não existir, usa a lista local. */
+    function carregarFeed() {
+      if (!CONFIG.feedEndpoint) { return Promise.resolve(CONFIG.instagram); }
+      return fetch(CONFIG.feedEndpoint)
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          var posts = (d.data || d || []).slice(0, 8).map(function (p) {
+            return {
+              foto: p.media_url || p.thumbnail_url || '',
+              titulo: (p.caption || 'Publicação').split('\n')[0].slice(0, 42),
+              texto: (p.caption || '').slice(0, 90),
+              tipo: p.media_type === 'VIDEO' ? 'Reels' : 'Publicação',
+              link: p.permalink || ''
+            };
+          });
+          return posts.length ? posts : CONFIG.instagram;
+        })
+        .catch(function () { return CONFIG.instagram; });
+    }
+
+    carregarFeed().then(function (lista) {
+      render(lista);
+      sincronizar();
+      tocar();
+    });
+
+    // Exposto para inspeção e manutenção:
+    // ONCarrossel.irPara(2), ONCarrossel.atual(), ONCarrossel.destino(n)
+    window.ONCarrossel = {
+      irPara: irPara,
+      atual: atual,
+      destino: function (i) { var s = slides(); return s[i] ? destino(s[i]) : null; },
+      total: function () { return slides().length; },
+      parar: parar,
+      tocar: tocar
+    };
+  })();
 
   /* ---------------------------------------------------------------------
      FORMULÁRIO

@@ -644,3 +644,89 @@ html{ scrollbar-width:thin; scrollbar-color:var(--gold) var(--ink); }
   .bp-line path,.bp-line circle{ stroke-dashoffset:0 !important; }
 }
 @media print{ .blueprint{ display:none; } }
+
+/* =========================================================================
+   CARROSSEL DE OBRAS E INSTAGRAM
+   Rolagem nativa com scroll-snap: arrasta com o dedo sem depender de JS.
+   O JS só acrescenta setas, indicadores e avanço automático.
+   ========================================================================= */
+.carrossel{ margin-top:var(--sp-8); position:relative; }
+
+.carrossel__track{
+  display:flex; gap:var(--sp-5);
+  overflow-x:auto; overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory; scroll-behavior:smooth;
+  /* o recuo precisa existir tambem como scroll-padding, senao o snap
+     alinha o slide na borda do scrollport e anula o respiro lateral */
+  --recuo:max(var(--sp-5), calc((100vw - var(--wrap)) / 2 + var(--sp-6)));
+  padding:var(--sp-2) var(--recuo) var(--sp-5);
+  scroll-padding-inline:var(--recuo);
+  scrollbar-width:none;
+}
+.carrossel__track::-webkit-scrollbar{ display:none; }
+.carrossel__track:focus-visible{ outline:3px solid var(--gold); outline-offset:-3px; border-radius:var(--r-lg); }
+
+.slide{
+  flex:0 0 auto; width:min(76vw, 340px); scroll-snap-align:center;
+  border-radius:var(--r-lg); overflow:hidden; background:var(--dark-2);
+  position:relative; text-decoration:none; color:var(--white);
+  box-shadow:var(--shadow-sm); transition:transform var(--t), box-shadow var(--t);
+}
+@media (min-width:720px){ .slide{ width:330px; scroll-snap-align:start; } }
+.slide:hover{ transform:translateY(-4px); box-shadow:var(--shadow-md); }
+
+.slide__media{ position:relative; aspect-ratio:4/5; background:var(--sand); overflow:hidden; }
+.slide__media img{ width:100%; height:100%; object-fit:cover; transition:transform 700ms cubic-bezier(.2,.6,.3,1); }
+.slide:hover .slide__media img{ transform:scale(1.05); }
+
+/* moldura de espera enquanto a foto real nao chega */
+.slide__ph{
+  position:absolute; inset:0; display:grid; place-items:center; text-align:center; padding:var(--sp-5);
+  background:
+    repeating-linear-gradient(135deg, rgba(115,97,70,.10) 0 12px, transparent 12px 24px),
+    var(--sand);
+  border:1px dashed var(--line-strong); border-radius:var(--r-lg);
+}
+.slide__ph span{ font-size:.75rem; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--bronze-text); max-width:22ch; line-height:1.5; }
+
+.slide__tipo{
+  position:absolute; top:var(--sp-3); left:var(--sp-3); z-index:2;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 11px; border-radius:var(--r-pill);
+  background:rgba(20,19,17,.72); backdrop-filter:blur(6px);
+  font-size:.6875rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--gold);
+}
+.slide__cap{
+  position:absolute; left:0; right:0; bottom:0; padding:var(--sp-6) var(--sp-5) var(--sp-5);
+  background:linear-gradient(to top, rgba(20,19,17,.95) 25%, rgba(20,19,17,.66) 60%, transparent 100%);
+}
+.slide__cap p{ font-size:var(--fs-small); color:#E6E1D6; line-height:1.5; }
+.slide__cap b{ display:block; font-family:var(--font-display); font-weight:600;
+  font-size:1.05rem; color:var(--white); margin-bottom:5px; letter-spacing:-.01em; }
+
+/* controles */
+.carrossel__ui{ display:flex; align-items:center; justify-content:space-between;
+  gap:var(--sp-5); margin-top:var(--sp-4); }
+.carrossel__dots{ display:flex; gap:9px; flex-wrap:wrap; }
+.cdot{
+  width:9px; height:9px; padding:0; border:0; border-radius:50%; cursor:pointer;
+  background:var(--line-strong); transition:background-color var(--t), width var(--t);
+}
+.cdot[aria-selected="true"]{ background:var(--bronze); width:26px; border-radius:var(--r-pill); }
+.carrossel__nav{ display:flex; gap:var(--sp-3); }
+.cbtn{
+  width:48px; height:48px; border-radius:50%; display:grid; place-items:center; cursor:pointer;
+  background:transparent; color:var(--ink); border:1.5px solid var(--line-strong);
+  transition:background-color var(--t), border-color var(--t), color var(--t), transform var(--t);
+}
+.cbtn:hover{ background:var(--ink); border-color:var(--ink); color:var(--white); }
+.cbtn:active{ transform:scale(.94); }
+.cbtn[disabled]{ opacity:.35; cursor:not-allowed; }
+.cbtn[disabled]:hover{ background:transparent; color:var(--ink); border-color:var(--line-strong); }
+
+@media (prefers-reduced-motion:reduce){
+  .carrossel__track{ scroll-behavior:auto; }
+  .slide:hover{ transform:none; }
+  .slide:hover .slide__media img{ transform:none; }
+}
