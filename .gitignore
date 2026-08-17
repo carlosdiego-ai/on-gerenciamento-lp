@@ -3,3 +3,7 @@ Thumbs.db
 *.log
 node_modules/
 .vercel
+
+# arquivos temporarios de teste e validacao
+_*.html
+*.probe.html
