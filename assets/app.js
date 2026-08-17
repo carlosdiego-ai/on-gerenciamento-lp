@@ -19,8 +19,10 @@
        CARROSSEL DE OBRAS E INSTAGRAM
 
        Para trocar o conteúdo, edite a lista abaixo. Cada item aceita:
-         foto    caminho da imagem em assets/img/ (deixe vazio para
-                 aparecer a moldura de espera com a legenda de orientação)
+         foto    caminho da imagem. Ja aponta para assets/img/obra-01.jpg
+                 ate obra-06.jpg: basta salvar os arquivos com esses nomes
+                 na pasta que eles aparecem sozinhos, sem editar nada aqui.
+                 Se o arquivo nao existir, entra a moldura de espera.
          titulo  nome da obra ou do conteúdo
          texto   uma linha curta de contexto
          tipo    rótulo do canto superior (Obra entregue, Reels, Bastidor)
@@ -30,12 +32,12 @@
        carregarFeed() mais abaixo.
        ------------------------------------------------------------------- */
     instagram: [
-      { foto:'', titulo:'Residência em Adamantina', texto:'Do terreno à entrega das chaves, com cronograma cumprido.', tipo:'Obra entregue', link:'' },
-      { foto:'', titulo:'Concretagem da laje',      texto:'Acompanhamento técnico em cada etapa crítica da estrutura.', tipo:'Bastidor', link:'' },
-      { foto:'', titulo:'Residência em condomínio', texto:'Alto padrão com acabamento conferido serviço a serviço.', tipo:'Obra entregue', link:'' },
-      { foto:'', titulo:'Visita técnica semanal',   texto:'O relatório que chega para o cliente sai daqui.', tipo:'Bastidor', link:'' },
-      { foto:'', titulo:'Obra comercial',           texto:'Prazo e custo definidos antes da primeira pedra.', tipo:'Obra entregue', link:'' },
-      { foto:'', titulo:'Detalhe de acabamento',    texto:'O padrão se mantém porque alguém confere.', tipo:'Reels', link:'' }
+      { foto:'assets/img/obra-01.jpg', titulo:'Residência em Adamantina', texto:'Do terreno à entrega das chaves, com cronograma cumprido.', tipo:'Obra entregue', link:'' },
+      { foto:'assets/img/obra-02.jpg', titulo:'Concretagem da laje',      texto:'Acompanhamento técnico em cada etapa crítica da estrutura.', tipo:'Bastidor', link:'' },
+      { foto:'assets/img/obra-03.jpg', titulo:'Residência em condomínio', texto:'Alto padrão com acabamento conferido serviço a serviço.', tipo:'Obra entregue', link:'' },
+      { foto:'assets/img/obra-04.jpg', titulo:'Visita técnica semanal',   texto:'O relatório que chega para o cliente sai daqui.', tipo:'Bastidor', link:'' },
+      { foto:'assets/img/obra-05.jpg', titulo:'Obra comercial',           texto:'Prazo e custo definidos antes da primeira pedra.', tipo:'Obra entregue', link:'' },
+      { foto:'assets/img/obra-06.jpg', titulo:'Detalhe de acabamento',    texto:'O padrão se mantém porque alguém confere.', tipo:'Reels', link:'' }
     ],
     feedAutoplay: 5200                     // ms entre trocas. 0 desliga.
   };
@@ -256,10 +258,16 @@
     }
 
     function montarSlide(item, i) {
-      var temFoto = item.foto && item.foto.trim();
-      var midia = temFoto
-        ? '<img src="' + esc(item.foto) + '" alt="' + esc(item.titulo) + '" loading="lazy" decoding="async">'
-        : '<div class="slide__ph"><span>Foto: ' + esc(item.titulo) + '</span></div>';
+      /* A imagem é sempre tentada. Se o arquivo ainda não existe na pasta,
+         o onerror troca pela moldura de espera. Assim basta soltar o arquivo
+         em assets/img/ com o nome certo, sem precisar editar este arquivo. */
+      var espera = '<div class="slide__ph"><span>Foto: ' + esc(item.titulo) + '</span></div>';
+      var midia = item.foto && item.foto.trim()
+        ? '<img src="' + esc(item.foto) + '" alt="' + esc(item.titulo) + '"'
+          + ' loading="lazy" decoding="async"'
+          + ' onerror="this.parentNode.innerHTML=this.dataset.espera"'
+          + ' data-espera="' + esc(espera) + '">'
+        : espera;
 
       var interno =
         '<div class="slide__media">' + midia + '</div>' +

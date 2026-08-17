@@ -210,7 +210,22 @@ Critério usado para decidir o que cortar: se a frase não muda a decisão de pr
 
 A seção de portfólio virou um carrossel que passa sozinho.
 
-### Como trocar o conteúdo
+### Como colocar as fotos
+
+Basta salvar os arquivos em `assets/img/` com estes nomes exatos. Não precisa editar código nenhum:
+
+| Arquivo | Sugestão de conteúdo |
+|---|---|
+| `obra-01.jpg` | Residência em Adamantina, fachada finalizada |
+| `obra-02.jpg` | Concretagem da laje, obra em andamento |
+| `obra-03.jpg` | Residência em condomínio |
+| `obra-04.jpg` | Visita técnica, equipe conferindo serviço |
+| `obra-05.jpg` | Obra comercial entregue |
+| `obra-06.jpg` | Detalhe de acabamento |
+
+Vertical em 4:5 (por exemplo 1080 por 1350) e abaixo de 300 KB cada. Enquanto o arquivo não existir, aquele card mostra a moldura de espera com o nome da foto que falta, e nunca uma imagem quebrada. O mesmo guia está em `assets/img/LEIA-ME.txt`.
+
+### Como trocar os textos
 
 Abra `assets/app.js` e edite a lista `CONFIG.instagram`. Cada item aceita:
 
