@@ -51,7 +51,7 @@ A frase "não competimos por volume, competimos por valor" e a origem do nome vi
 | Endpoint do lead | `assets/app.js`, `CONFIG.endpoint` | Vazio. Sem ele o lead só vai para o pixel e o WhatsApp |
 | **Nome e função do terceiro** | seção `#equipe` | Está como "Rafael, acompanhamento técnico", vindo da apresentação. **Confirmar antes de publicar** |
 | Fotos das obras | seção `#obras` | Quatro placeholders, com metragem e prazo a informar |
-| CREA e CAU | rodapé | Consta como a informar |
+| CAU (arquitetura) | rodapé | A informar. O CREA 2331836-SP já está publicado |
 | Política de privacidade | rodapé e formulário | Link aponta para âncora vazia |
 | Número de obras entregues | vários | Se a ON confirmar, entra na faixa de credenciais |
 
@@ -172,3 +172,34 @@ ONPlanta.desenhar(1)     // casa pronta
 **Para editar o desenho:** o SVG está inline no `index.html`, logo depois de `<div class="shell">`. Cada etapa é um `<g data-etapa="...">`. Acrescentar ou remover grupos muda automaticamente o número de faixas, o JS se adapta.
 
 No celular a planta cai para 16% de opacidade e alarga, para virar textura em vez de desenho. Com `prefers-reduced-motion` ela aparece inteira, sem animar. Na impressão, some.
+
+
+---
+
+## 8. Refino de densidade, agosto de 2026
+
+A primeira versão tinha texto demais para uma página de captação. Medi e cortei.
+
+| Métrica | Antes | Depois |
+|---|---|---|
+| Palavras na página | 1.267 | 965 |
+| Tempo de leitura | 6,3 min | 4,8 min |
+| Seções | 12 | 11 |
+| Parágrafos acima de 28 palavras | 4 (um com 47) | 0 |
+| Densidade da seção Sobre | 18,0 palavras por 100px | 11,3 |
+
+**O que saiu:**
+
+- A seção Resultado foi fundida em Diferenciais. As duas respondiam a mesma pergunta com 10 cards no total; hoje são 4, e cada um junta o diferencial com o ganho que ele gera.
+- A seção Sobre repetia literalmente, em uma lista, o que os cards ao lado já diziam sobre não vender material e não receber comissão. A duplicação saiu.
+- Para quem é passou de 5 para 4 itens na coluna afirmativa.
+- Todos os textos de apoio foram reescritos para caber em uma ou duas linhas.
+
+**O que ganhou ar:**
+
+- Espaçamento vertical das seções subiu um degrau na escala, de 4rem para 5,5rem no celular e de 5,5rem para 7rem no desktop.
+- A medida de leitura dos textos de apoio caiu de 60 para 46 caracteres, e a dos títulos de 20 para 16.
+- Texto dentro de card limitado a 34 caracteres por linha.
+- Mais respiro entre o cabeçalho de cada seção e o conteúdo dela.
+
+Critério usado para decidir o que cortar: se a frase não muda a decisão de preencher o formulário, ela sai. O que sobrou é específico e verificável, no lugar de adjetivo.
