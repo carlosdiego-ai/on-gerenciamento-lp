@@ -31,7 +31,7 @@ O formulário de entrada preenchido pelo Fernando corrigiu dados que estavam err
 
 | Antes | Agora | Fonte |
 |---|---|---|
-| Fundada em 2020 | **Abril de 2021** | Formulário de entrada |
+| Fundada em 2020 | **Desde 2020**, atuando como ON. O CNPJ foi aberto em 2021 | Fernando, sócio, em 2026-08-18 |
 | Mais de 30 obras entregues | **Removido** | Número nunca foi confirmado |
 | Ana Flora | **Ana Flora Nalfal**, arquiteta e sócia | Formulário de entrada |
 | Equipe genérica | **Oliveira + Nalfal**, origem do nome ON | Formulário de entrada |
@@ -271,3 +271,16 @@ ONCarrossel.atual()      // posição atual
 ONCarrossel.irPara(2)    // vai para a terceira parada
 ONCarrossel.parar()      // desliga o avanço automático
 ```
+
+
+---
+
+## 10. O ano da ON
+
+A página diz **desde 2020**, e é assim que fica em toda a comunicação.
+
+A dupla passou a atuar como ON em 2020. O CNPJ só foi aberto em 2021, o que explica a divergência: o formulário de entrada registrava a data de abertura da empresa, não a data em que a ON começou a operar. Fernando esclareceu isso em 18 de agosto de 2026.
+
+Por isso a credencial abaixo do hero diz "Atuando em Adamantina" em vez de "Fundada em Adamantina": o verbo acompanha o fato. Fundação jurídica é 2021, atuação é 2020, e o que interessa para quem vai contratar é há quanto tempo a ON toca obra.
+
+Os roteiros da VSL e dos anúncios já usavam 2020 e não precisaram de ajuste.
