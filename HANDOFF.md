@@ -285,3 +285,30 @@ A dupla passou a atuar como ON em 2020. O CNPJ só foi aberto em 2021, o que exp
 Por isso a credencial abaixo do hero diz "Atuando em Adamantina" em vez de "Fundada em Adamantina": o verbo acompanha o fato. Fundação jurídica é 2021, atuação é 2020, e o que interessa para quem vai contratar é há quanto tempo a ON toca obra.
 
 Os roteiros da VSL e dos anúncios já usavam 2020 e não precisaram de ajuste.
+
+
+---
+
+## 11. Cache dos arquivos
+
+Em 20 de agosto de 2026 o site aparecia quebrado no navegador mesmo com a versão certa publicada. A causa era a política de cache original, que marcava todos os assets como `immutable` por um ano.
+
+`immutable` diz ao navegador para nunca revalidar, nem com F5. Como os arquivos têm nome fixo, quem já tinha visitado o site ficava preso na versão antiga do CSS e do JS, enquanto o HTML vinha novo. Resultado: layout sem estilo e carrossel vazio.
+
+**Como está agora:**
+
+| Arquivo | Cache | Motivo |
+|---|---|---|
+| `index.html` | sempre revalida | precisa entregar as URLs novas dos assets |
+| `styles.css`, `app.js` | 1 ano, immutable | seguro, porque levam `?v=<hash>` na URL |
+| `assets/img/` | 1 hora + revalidação em segundo plano | as fotos são substituídas com o mesmo nome quando o feed é atualizado |
+
+**Antes de cada deploy, rode:**
+
+```bash
+bash ferramentas/versionar-assets.sh
+```
+
+Ele calcula o hash do conteúdo de `styles.css` e `app.js` e injeta na referência dentro do `index.html`. Se o conteúdo mudou, a URL muda e o navegador busca de novo sozinho. Se não mudou, nada acontece.
+
+Esquecer esse passo não quebra o site, mas faz visitantes antigos continuarem vendo a versão anterior do CSS e do JS.
