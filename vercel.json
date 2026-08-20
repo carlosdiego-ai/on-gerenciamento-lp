@@ -4,14 +4,12 @@
   "trailingSlash": false,
   "headers": [
     {
-      "comment": "CSS e JS levam ?v=<hash> no HTML, entao a URL muda quando o conteudo muda. So por isso o immutable e seguro aqui.",
       "source": "/assets/(.*).(css|js)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
     {
-      "comment": "Imagens sao substituidas com o mesmo nome quando o feed do Instagram e atualizado, entao precisam revalidar.",
       "source": "/assets/img/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }
