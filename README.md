@@ -23,11 +23,26 @@ Depois abra http://localhost:8000
 
 ## Deploy
 
-Site estático. Na Vercel, importe o repositório e use:
+O site está no ar em dois endereços, os dois servindo o mesmo conteúdo:
 
-- Framework Preset: **Other**
-- Build Command: vazio
-- Output Directory: `.`
+| Ambiente | Endereço | Atualiza |
+|---|---|---|
+| Vercel (principal) | https://on-gerenciamento-lp.vercel.app | `npx vercel deploy --prod` |
+| GitHub Pages | https://carlosdiego-ai.github.io/on-gerenciamento-lp/ | sozinho a cada push na `main` |
+
+O projeto na Vercel é `on-gerenciamento-lp`, sob o escopo
+Carlos Diego - Formula Otica's projects. É site estático:
+Framework Preset **Other**, sem build, output no diretório raiz.
+
+Para publicar uma alteração:
+
+```bash
+git add -A && git commit -m "..." && git push
+npx vercel deploy --prod --yes
+```
+
+O push sozinho já republica o GitHub Pages. O comando da Vercel é
+o que atualiza o endereço principal.
 
 ## Antes de publicar
 
