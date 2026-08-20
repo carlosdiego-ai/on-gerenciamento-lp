@@ -210,20 +210,21 @@ Critério usado para decidir o que cortar: se a frase não muda a decisão de pr
 
 A seção de portfólio virou um carrossel que passa sozinho.
 
-### Como colocar as fotos
+### As fotos vêm do Instagram
 
-Basta salvar os arquivos em `assets/img/` com estes nomes exatos. Não precisa editar código nenhum:
+As seis imagens do carrossel são posts reais de @ongerenciamento, baixados e servidos localmente em `assets/img/obra-01.jpg` até `obra-06.jpg`.
 
-| Arquivo | Sugestão de conteúdo |
-|---|---|
-| `obra-01.jpg` | Residência em Adamantina, fachada finalizada |
-| `obra-02.jpg` | Concretagem da laje, obra em andamento |
-| `obra-03.jpg` | Residência em condomínio |
-| `obra-04.jpg` | Visita técnica, equipe conferindo serviço |
-| `obra-05.jpg` | Obra comercial entregue |
-| `obra-06.jpg` | Detalhe de acabamento |
+Servir local em vez de apontar para o Instagram é intencional: as URLs do CDN da Meta carregam token de expiração e quebrariam em poucos dias se usadas direto na página.
 
-Vertical em 4:5 (por exemplo 1080 por 1350) e abaixo de 300 KB cada. Enquanto o arquivo não existir, aquele card mostra a moldura de espera com o nome da foto que falta, e nunca uma imagem quebrada. O mesmo guia está em `assets/img/LEIA-ME.txt`.
+**Para atualizar quando a ON postar coisa nova:**
+
+```bash
+bash ferramentas/atualizar-instagram.sh
+```
+
+O script busca os posts mais recentes, baixa, corta em 4:5, otimiza e substitui os arquivos. Depois é só ajustar título, texto e link de cada card em `CONFIG.instagram` no `assets/app.js` e fazer commit.
+
+Para trocar uma foto pontualmente, basta salvar o arquivo por cima com o mesmo nome. Se algum arquivo faltar, aquele card mostra a moldura de espera em vez de imagem quebrada.
 
 ### Como trocar os textos
 

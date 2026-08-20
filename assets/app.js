@@ -32,12 +32,24 @@
        carregarFeed() mais abaixo.
        ------------------------------------------------------------------- */
     instagram: [
-      { foto:'assets/img/obra-01.jpg', titulo:'Residência em Adamantina', texto:'Do terreno à entrega das chaves, com cronograma cumprido.', tipo:'Obra entregue', link:'' },
-      { foto:'assets/img/obra-02.jpg', titulo:'Concretagem da laje',      texto:'Acompanhamento técnico em cada etapa crítica da estrutura.', tipo:'Bastidor', link:'' },
-      { foto:'assets/img/obra-03.jpg', titulo:'Residência em condomínio', texto:'Alto padrão com acabamento conferido serviço a serviço.', tipo:'Obra entregue', link:'' },
-      { foto:'assets/img/obra-04.jpg', titulo:'Visita técnica semanal',   texto:'O relatório que chega para o cliente sai daqui.', tipo:'Bastidor', link:'' },
-      { foto:'assets/img/obra-05.jpg', titulo:'Obra comercial',           texto:'Prazo e custo definidos antes da primeira pedra.', tipo:'Obra entregue', link:'' },
-      { foto:'assets/img/obra-06.jpg', titulo:'Detalhe de acabamento',    texto:'O padrão se mantém porque alguém confere.', tipo:'Reels', link:'' }
+      { foto:'assets/img/obra-01.jpg', titulo:'Residência MB entrou em obra',
+        texto:'441 m², dois níveis, grandes vãos e 18 meses de gestão pela frente.',
+        tipo:'Obra em andamento', link:'https://www.instagram.com/p/DbtoX0ojdMW/' },
+      { foto:'assets/img/obra-02.jpg', titulo:'Residencial PRI',
+        texto:'Casa de esquina em fase de acabamento, com porcelanato de grande formato.',
+        tipo:'Reels', link:'https://www.instagram.com/p/Dboey9WFrnB/' },
+      { foto:'assets/img/obra-03.jpg', titulo:'Você não precisa ir à obra todo dia',
+        texto:'Controle não vem da frequência de visita, vem da qualidade da informação.',
+        tipo:'Publicação', link:'https://www.instagram.com/p/DbVz8BVDAEJ/' },
+      { foto:'assets/img/obra-04.jpg', titulo:'Alto padrão não aceita improviso',
+        texto:'Muitos projetistas, fornecedores especializados e exigência acima da média.',
+        tipo:'Publicação', link:'https://www.instagram.com/p/Db_p2SqGuIX/' },
+      { foto:'assets/img/obra-05.jpg', titulo:'Quem defende o seu interesse na obra',
+        texto:'O empreiteiro defende a execução, o lojista defende o material. E você?',
+        tipo:'Publicação', link:'https://www.instagram.com/p/Dbyx4fpjFzu/' },
+      { foto:'assets/img/obra-06.jpg', titulo:'Gestão decide, não só organiza',
+        texto:'Define prioridades, estrutura o plano de execução e valida cada escolha.',
+        tipo:'Publicação', link:'https://www.instagram.com/p/DbwNLq_G6aX/' }
     ],
     feedAutoplay: 5200                     // ms entre trocas. 0 desliga.
   };
@@ -269,10 +281,14 @@
           + ' data-espera="' + esc(espera) + '">'
         : espera;
 
+      /* Os posts da ON já trazem texto na própria arte, então a legenda
+         fica abaixo da imagem em vez de sobreposta. Sobrepor embolaria
+         os dois textos. */
       var interno =
-        '<div class="slide__media">' + midia + '</div>' +
-        (item.tipo ? '<span class="slide__tipo">' + esc(item.tipo) + '</span>' : '') +
-        '<div class="slide__cap"><b>' + esc(item.titulo) + '</b><p>' + esc(item.texto) + '</p></div>';
+        '<div class="slide__media">' + midia +
+          (item.tipo ? '<span class="slide__tipo">' + esc(item.tipo) + '</span>' : '') +
+        '</div>' +
+        '<div class="slide__info"><b>' + esc(item.titulo) + '</b><p>' + esc(item.texto) + '</p></div>';
 
       var el;
       if (item.link) {
