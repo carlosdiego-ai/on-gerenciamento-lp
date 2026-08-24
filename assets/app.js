@@ -217,24 +217,53 @@
   }
 
   /* ---------------------------------------------------------------------
-     PLAYER DA VSL — enquanto o vídeo não chega, o botão leva ao formulário
+     VSL NO WISTIA — tira o selo quando o vídeo começa e manda os eventos
+     de audiência para o pixel. Cada evento tem trava própria, então nada
+     dispara duas vezes mesmo que o Wistia avise pelos dois caminhos.
      --------------------------------------------------------------------- */
-  var play = $('.vsl__play');
-  if (play) {
-    play.addEventListener('click', function () {
-      var alvo = $('#contato');
-      if (alvo) { alvo.scrollIntoView({ behavior: CONFIG.reduzirMovimento ? 'auto' : 'smooth' }); }
-    });
-  }
+  var vslBloco = $('#vslBloco');
+  var vslPlayer = document.querySelector('wistia-player');
+  if (vslPlayer) {
+    var VSL_DURACAO = 357; // 5min57s, usado só se o player não informar
+    var vslTocou = false, vslMetade = false, vslFim = false;
 
-  // Quando o vídeo real entrar, este observador dispara ViewContent na metade.
-  var video = document.querySelector('#vsl video');
-  if (video) {
-    var meio = false;
-    video.addEventListener('timeupdate', function () {
-      if (!meio && video.duration && video.currentTime / video.duration >= 0.5) {
-        meio = true;
-        track('ViewContent', { content_name: 'VSL 50%' });
+    var vslIniciou = function () {
+      if (vslTocou) { return; }
+      vslTocou = true;
+      if (vslBloco) { vslBloco.classList.add('vsl--tocando'); }
+      track('ViewContent', { content_name: 'VSL iniciada' });
+    };
+    var vslNaMetade = function () {
+      if (vslMetade) { return; }
+      vslMetade = true;
+      track('ViewContent', { content_name: 'VSL 50%' });
+    };
+    var vslTerminou = function () {
+      if (vslFim) { return; }
+      vslFim = true;
+      track('ViewContent', { content_name: 'VSL concluida' });
+    };
+    var vslProgresso = function (segundos) {
+      var total = Number(vslPlayer.duration) || VSL_DURACAO;
+      var agora = typeof segundos === 'number' ? segundos : (Number(vslPlayer.currentTime) || 0);
+      if (total && agora / total >= 0.5) { vslNaMetade(); }
+    };
+
+    vslPlayer.addEventListener('play', vslIniciou);
+    vslPlayer.addEventListener('end', vslTerminou);
+    ['secondchange', 'timeupdate'].forEach(function (nome) {
+      vslPlayer.addEventListener(nome, function () { vslProgresso(); });
+    });
+
+    // Rede de segurança: se os eventos do web component não chegarem,
+    // a API clássica do Wistia entrega os mesmos avisos.
+    window._wq = window._wq || [];
+    window._wq.push({
+      id: 'c3tgrzrn39',
+      onReady: function (video) {
+        video.bind('play', function () { vslIniciou(); });
+        video.bind('end', function () { vslTerminou(); });
+        video.bind('secondchange', function (s) { vslProgresso(s); });
       }
     });
   }

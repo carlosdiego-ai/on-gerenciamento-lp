@@ -25,6 +25,26 @@ Enquanto o vídeo não chega, o play leva ao formulário. A página já converte
 
 ---
 
+## 2. A VSL
+
+O vídeo está hospedado no **Wistia**, media-id `c3tgrzrn39`, com 5min57s. O player entra por web component, com a cor da marca:
+
+```html
+<wistia-player media-id="c3tgrzrn39" aspect="1.7777777777777777" player-color="#D9B877"></wistia-player>
+```
+
+Para trocar o vídeo, mude o media-id em dois lugares: na tag acima e no `<script src="https://fast.wistia.com/embed/{id}.js">` no fim do `index.html`.
+
+O `app.js` escuta o player e manda três eventos para o pixel: `VSL iniciada`, `VSL 50%` e `VSL concluida`. Cada um tem trava própria, porque a escuta acontece por dois caminhos ao mesmo tempo, os eventos do web component e a API clássica pelo `window._wq`. Se um caminho falhar o outro cobre, e nenhum evento sai duplicado.
+
+O selo `Vídeo · 6 min` fica no canto superior esquerdo da moldura, não no inferior, porque embaixo ficam o cronômetro e a barra de controle do Wistia. Ele some quando o vídeo começa, e tem `pointer-events:none` para nunca roubar um clique do player.
+
+O CSS do antigo placeholder foi removido, junto com o `@keyframes pulso` que só ele usava.
+
+**Pendente no painel do Wistia:** o botão de play grande ainda é o retângulo arredondado padrão. Dá para trocar por um círculo em Customize, no painel do vídeo, sem mexer no código.
+
+---
+
 ## 2. Correções de conteúdo feitas nesta versão
 
 O formulário de entrada preenchido pelo Fernando corrigiu dados que estavam errados na versão anterior:

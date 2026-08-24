@@ -10,7 +10,11 @@
 <meta property="og:title" content="ON Gerenciamento de Obras | Alto padrão em Adamantina e região">
 <meta property="og:description" content="Gerenciamos sua obra do início ao fim com método, transparência e acompanhamento técnico especializado.">
 <meta property="og:locale" content="pt_BR">
-<link rel="stylesheet" href="assets/styles.css?v=f0c22ead">
+<link rel="preconnect" href="https://fast.wistia.com">
+<link rel="preconnect" href="https://fast.wistia.net">
+<link rel="preconnect" href="https://embed-ssl.wistia.com" crossorigin>
+<link rel="preconnect" href="https://distillery.wistia.com">
+<link rel="stylesheet" href="assets/styles.css?v=0532f47d">
 <script>document.documentElement.className += ' js';</script>
 
 <!-- ============================================================
@@ -175,36 +179,17 @@
     </div>
 
     <!-- ============================================================
-         ESPAÇO DA VSL
-         Apague a div .vsl__placeholder e descomente uma das opções.
+         VSL — hospedada no Wistia, media-id c3tgrzrn39
+         Duração 5min57s. Para trocar o vídeo basta mudar o media-id
+         nos dois lugares: no <wistia-player> e no <script> do embed
+         no fim do arquivo. A cor do player acompanha o dourado da marca.
          ============================================================ -->
-    <div class="vsl reveal reveal--zoom">
+    <div class="vsl reveal reveal--zoom" id="vslBloco">
       <div class="vsl__frame" id="vsl">
-
-        <!-- OPÇÃO A — arquivo local em assets/vsl.mp4 -->
-        <!--
-        <video controls preload="metadata" poster="assets/img/vsl-capa.jpg" playsinline>
-          <source src="assets/vsl.mp4" type="video/mp4">
-          Seu navegador não reproduz vídeo.
-        </video>
-        -->
-
-        <!-- OPÇÃO B — YouTube ou Vimeo não listado -->
-        <!--
-        <iframe src="https://www.youtube.com/embed/ID_DO_VIDEO?rel=0&modestbranding=1"
-                title="Fernando Oliveira explica o gerenciamento de obra da ON"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
-                allowfullscreen loading="lazy"></iframe>
-        -->
-
-        <div class="vsl__placeholder" id="vslPlaceholder">
-          <button class="vsl__play" type="button" aria-label="O vídeo entra aqui, ir para o formulário">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.3-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z"/></svg>
-          </button>
-          <p class="vsl__label">O vídeo do Fernando entra aqui</p>
-          <p class="vsl__hint">Em poucos minutos ele explica como funciona o gerenciamento da sua obra.</p>
-        </div>
-        <span class="vsl__badge">Vídeo · 5 min</span>
+        <wistia-player media-id="c3tgrzrn39"
+                       aspect="1.7777777777777777"
+                       player-color="#D9B877"></wistia-player>
+        <span class="vsl__badge">Vídeo · 6 min</span>
       </div>
       <p class="vsl__caption">Assista antes de preencher. A conversa começa muito mais adiantada.</p>
     </div>
@@ -628,6 +613,8 @@
   </a>
 </div>
 
-<script src="assets/app.js?v=2764d518"></script>
+<script src="https://fast.wistia.com/player.js" async></script>
+<script src="https://fast.wistia.com/embed/c3tgrzrn39.js" async type="module"></script>
+<script src="assets/app.js?v=a11ca8e8"></script>
 </body>
 </html>
