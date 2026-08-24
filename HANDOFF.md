@@ -33,8 +33,8 @@ O formulário de entrada preenchido pelo Fernando corrigiu dados que estavam err
 |---|---|---|
 | Fundada em 2020 | **Desde 2020**, atuando como ON. O CNPJ foi aberto em 2021 | Fernando, sócio, em 2026-08-18 |
 | Mais de 30 obras entregues | **Removido** | Número nunca foi confirmado |
-| Ana Flora | **Ana Flora Nalfal**, arquiteta e sócia | Formulário de entrada |
-| Equipe genérica | **Oliveira + Nalfal**, origem do nome ON | Formulário de entrada |
+| Ana Flora Nalfal | **Ana Flora Naufal**, arquiteta e sócia. Sobrenome é Naufal, com u, nunca Nalfal | Fernando, sócio, em 2026-08-24 |
+| Equipe genérica | **Oliveira + Naufal**, origem do nome ON | Formulário de entrada |
 | Só residencial | **Residencial e comercial** de alto padrão | Formulário de entrada |
 | Adamantina e região | **Região oeste paulista** | Formulário de entrada |
 
