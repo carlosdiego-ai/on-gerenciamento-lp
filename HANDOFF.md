@@ -25,6 +25,28 @@ Enquanto o vídeo não chega, o play leva ao formulário. A página já converte
 
 ---
 
+## 2. Rastreamento
+
+O **pixel da Meta, ID `2072411560304254`**, está instalado no `<head>` e dispara o `PageView`. O `<noscript>` correspondente fica no início do `<body>`, não no `<head>`, porque dentro do head só valem `link`, `style` e `meta`.
+
+Todo o resto sai do `app.js` pela função `track()`, que chama `fbq` quando ele existe e escreve no console quando não existe. Nenhum evento fica preso a HTML.
+
+| Evento | Quando dispara | Parâmetro |
+|---|---|---|
+| `PageView` | Carga da página | — |
+| `ViewContent` | VSL iniciada, aos 50% e ao terminar | `content_name` |
+| `InitiateCheckout` | Clique em qualquer CTA e primeiro toque no formulário | `origem` |
+| `Lead` | Envio do formulário | `content_name`, `cidade` |
+| `Contact` | Clique no WhatsApp depois do envio | `origem` |
+
+`InitiateCheckout` mede intenção, não uma etapa única, então o mesmo visitante pode gerar mais de um. É de propósito. Para otimização de campanha use `Lead`, que é um por envio.
+
+Validado com o `fbevents.js` trocado por um stub, para a fila do `fbq` ficar intacta e ser lida depois. A sequência observada foi `init`, `PageView`, `InitiateCheckout {origem: header}`, `ViewContent {content_name: VSL iniciada}` e `InitiateCheckout {origem: formulario}`.
+
+**Não há aviso de cookies na página.** Se a ON quiser cobrir a LGPD com um banner de consentimento, é preciso decidir se o pixel só carrega depois do aceite, o que muda a instalação.
+
+---
+
 ## 2. A VSL
 
 O vídeo está hospedado no **Wistia**, media-id `c3tgrzrn39`, com 5min57s. O player entra por web component, com a cor da marca:

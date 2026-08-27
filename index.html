@@ -10,6 +10,7 @@
 <meta property="og:title" content="ON Gerenciamento de Obras | Alto padrão em Adamantina e região">
 <meta property="og:description" content="Gerenciamos sua obra do início ao fim com método, transparência e acompanhamento técnico especializado.">
 <meta property="og:locale" content="pt_BR">
+<link rel="preconnect" href="https://connect.facebook.net">
 <link rel="preconnect" href="https://fast.wistia.com">
 <link rel="preconnect" href="https://fast.wistia.net">
 <link rel="preconnect" href="https://embed-ssl.wistia.com" crossorigin>
@@ -18,12 +19,30 @@
 <script>document.documentElement.className += ' js';</script>
 
 <!-- ============================================================
-     PIXEL DA META — instalar antes de subir campanha.
-     Eventos: PageView, ViewContent (50% da VSL), InitiateCheckout,
+     PIXEL DA META — ID 2072411560304254
+     PageView sai daqui. Os demais eventos saem do app.js pela função
+     track(): ViewContent (VSL iniciada, 50% e concluída),
+     InitiateCheckout (cliques de CTA e primeiro toque no formulário),
      Lead (envio do formulário) e Contact (clique no WhatsApp).
+     O <noscript> fica no início do body, e não aqui, porque dentro
+     do <head> só valem link, style e meta.
      ============================================================ -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '2072411560304254');
+fbq('track', 'PageView');
+</script>
 </head>
 <body>
+<noscript><img height="1" width="1" style="display:none" alt=""
+src="https://www.facebook.com/tr?id=2072411560304254&amp;ev=PageView&amp;noscript=1"></noscript>
 <a href="#contato" class="sr-only">Pular para o formulário</a>
 
 <div class="shell">
