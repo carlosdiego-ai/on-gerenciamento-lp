@@ -169,6 +169,12 @@ button{ font:inherit; }
   display:block; margin-top:4px; font-family:var(--font-text); font-weight:500;
   font-size:.625rem; letter-spacing:.19em; text-transform:uppercase; color:var(--text-on-dark-soft);
 }
+/* A marca desenhada já diz ON; o texto ao lado não repete a sigla. */
+.brand__txt--nome{
+  font-family:var(--font-text); font-weight:500;
+  font-size:.7rem; letter-spacing:.19em; text-transform:uppercase;
+  color:var(--text-on-dark-soft);
+}
 .header__tag{ display:none; font-size:var(--fs-small); color:var(--text-on-dark-soft); margin-left:auto; margin-right:var(--sp-5); }
 .header .btn{ min-height:46px; padding:var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-5); font-size:.9375rem; }
 .header .btn .arw{ width:26px; height:26px; }
