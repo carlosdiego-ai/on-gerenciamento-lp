@@ -216,6 +216,46 @@ button{ font:inherit; }
 /* Player do Wistia: ocupa a moldura inteira. Enquanto o web component
    nao e definido, mostra a miniatura desfocada em vez de um buraco. */
 .vsl__frame wistia-player{ position:absolute; inset:0; display:block; width:100%; height:100%; }
+/* ---------- CAMADA QUE PEDE O SOM ----------
+   Cobre o player inteiro enquanto o vídeo roda mudo. Some no primeiro
+   toque. O halo pulsa para puxar o olho, e para quem pediu menos
+   movimento a animação é desligada mais abaixo. */
+.vsl__som{
+  position:absolute; inset:0; z-index:3; display:flex;
+  flex-direction:column; align-items:center; justify-content:center; gap:var(--sp-4);
+  background:rgba(16,15,13,.52); backdrop-filter:blur(2px);
+  border:0; cursor:pointer; color:var(--white); text-align:center; padding:var(--sp-5);
+  transition:opacity .32s ease, visibility .32s ease;
+}
+.vsl--com-som .vsl__som{ opacity:0; visibility:hidden; }
+.vsl__som-icone{
+  position:relative; z-index:1; flex:none;
+  width:88px; height:88px; border-radius:50%; display:grid; place-items:center;
+  background:var(--gold); color:var(--ink);
+  box-shadow:0 14px 38px rgba(217,184,119,.34);
+  transition:transform var(--t), background-color var(--t);
+}
+.vsl__som:hover .vsl__som-icone{ background:var(--gold-hover); transform:scale(1.05); }
+.vsl__som-icone::after{
+  content:''; position:absolute; inset:0; border-radius:50%;
+  border:2px solid rgba(217,184,119,.55);
+  animation:vslPulso 2.2s ease-out infinite; pointer-events:none;
+}
+@keyframes vslPulso{
+  0%{ transform:scale(.9); opacity:.8; }
+  75%{ transform:scale(1.45); opacity:0; }
+  100%{ transform:scale(1.45); opacity:0; }
+}
+.vsl__som-texto{
+  font-family:var(--font-display); font-size:var(--fs-small); letter-spacing:.02em;
+  color:var(--text-on-dark-soft); display:grid; gap:2px;
+}
+.vsl__som-texto b{ font-size:1.15rem; font-weight:600; color:var(--white); letter-spacing:.01em; }
+@media (max-width:640px){
+  .vsl__som-icone{ width:70px; height:70px; }
+  .vsl__som-texto b{ font-size:1.02rem; }
+}
+
 .vsl__frame wistia-player:not(:defined){
   background:center / contain no-repeat url('https://fast.wistia.com/embed/medias/c3tgrzrn39/swatch');
   filter:blur(5px);
@@ -567,6 +607,7 @@ html{ scrollbar-width:thin; scrollbar-color:var(--gold) var(--ink); }
 @media (prefers-reduced-motion:reduce){
   .js .reveal,.js .head--split > *{ opacity:1 !important; transform:none !important; }
   .h2::after{ transition:none; width:84px; }
+  .vsl__som-icone::after{ animation:none; }
   .btn--primary::before{ display:none; }
   .card:hover,.pain:hover,.tag:hover{ transform:none; }
   .progress{ display:none; }

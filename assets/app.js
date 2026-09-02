@@ -217,22 +217,51 @@
   }
 
   /* ---------------------------------------------------------------------
-     VSL NO WISTIA — tira o selo quando o vídeo começa e manda os eventos
-     de audiência para o pixel. Cada evento tem trava própria, então nada
-     dispara duas vezes mesmo que o Wistia avise pelos dois caminhos.
+     VSL NO WISTIA
+
+     O vídeo abre mudo e tocando, com a camada .vsl__som por cima. Só o
+     toque liga o áudio, e é ele que conta como audiência de verdade.
+     Autoplay mudo NÃO dispara evento nenhum, senão o pixel receberia um
+     ViewContent em toda visita e o dado não valeria nada.
+
+     Duas coisas foram medidas neste player e não são o que a
+     documentação genérica de embed sugere:
+
+     1. A legenda não liga por atributo no HTML. Liga pela propriedade
+        captionsEnabled, e só depois do evento api-ready.
+     2. Dos eventos, só api-ready dispara. Nem play, nem timeupdate, nem
+        secondchange chegam. Por isso o progresso é lido de currentTime
+        num intervalo, e não por evento. O intervalo só roda depois que o
+        som liga, e se encerra quando o vídeo acaba.
      --------------------------------------------------------------------- */
   var vslBloco = $('#vslBloco');
   var vslPlayer = document.querySelector('wistia-player');
   if (vslPlayer) {
     var VSL_DURACAO = 357; // 5min57s, usado só se o player não informar
-    var vslTocou = false, vslMetade = false, vslFim = false;
+    var vslComSom = false, vslMetade = false, vslFim = false, vslRelogio = null;
 
-    var vslIniciou = function () {
-      if (vslTocou) { return; }
-      vslTocou = true;
-      if (vslBloco) { vslBloco.classList.add('vsl--tocando'); }
-      track('ViewContent', { content_name: 'VSL iniciada' });
+    var vslLegenda = function () {
+      try {
+        // Cada idioma vem como objeto, com wistiaLanguageCode ('por') e
+        // bcp47LanguageTag ('pt'). Hoje só existe português, mas se um dia
+        // entrar inglês a legenda continua abrindo na língua certa.
+        var idiomas = vslPlayer.captionsLanguages;
+        if (idiomas && idiomas.length > 1) {
+          for (var i = 0; i < idiomas.length; i++) {
+            var c = idiomas[i] || {};
+            var cod = String(c.wistiaLanguageCode || c.bcp47LanguageTag || c).toLowerCase();
+            if (cod.indexOf('po') === 0 || cod.indexOf('pt') === 0) {
+              vslPlayer.captionsLanguage = c.wistiaLanguageCode || c.bcp47LanguageTag;
+              break;
+            }
+          }
+        }
+        vslPlayer.captionsEnabled = true;
+      } catch (err) {
+        console.error('[vsl] nao consegui ligar a legenda:', err);
+      }
     };
+
     var vslNaMetade = function () {
       if (vslMetade) { return; }
       vslMetade = true;
@@ -242,29 +271,58 @@
       if (vslFim) { return; }
       vslFim = true;
       track('ViewContent', { content_name: 'VSL concluida' });
+      if (vslRelogio) { clearInterval(vslRelogio); vslRelogio = null; }
     };
-    var vslProgresso = function (segundos) {
-      var total = Number(vslPlayer.duration) || VSL_DURACAO;
-      var agora = typeof segundos === 'number' ? segundos : (Number(vslPlayer.currentTime) || 0);
-      if (total && agora / total >= 0.5) { vslNaMetade(); }
+    var vslAcompanhar = function () {
+      if (vslRelogio) { return; }
+      vslRelogio = setInterval(function () {
+        var total = Number(vslPlayer.duration) || VSL_DURACAO;
+        var agora = Number(vslPlayer.currentTime) || 0;
+        if (!total) { return; }
+        if (agora / total >= 0.5) { vslNaMetade(); }
+        if (agora >= total - 1.5) { vslTerminou(); }
+      }, 2000);
     };
 
-    vslPlayer.addEventListener('play', vslIniciou);
-    vslPlayer.addEventListener('end', vslTerminou);
-    ['secondchange', 'timeupdate'].forEach(function (nome) {
-      vslPlayer.addEventListener(nome, function () { vslProgresso(); });
-    });
+    var vslLigouSom = function () {
+      if (vslComSom) { return; }
+      vslComSom = true;
+      if (vslBloco) { vslBloco.classList.add('vsl--com-som', 'vsl--tocando'); }
+      track('ViewContent', { content_name: 'VSL com som' });
+      vslAcompanhar();
+    };
 
-    // Rede de segurança: se os eventos do web component não chegarem,
-    // a API clássica do Wistia entrega os mesmos avisos.
-    window._wq = window._wq || [];
-    window._wq.push({
-      id: 'c3tgrzrn39',
-      onReady: function (video) {
-        video.bind('play', function () { vslIniciou(); });
-        video.bind('end', function () { vslTerminou(); });
-        video.bind('secondchange', function (s) { vslProgresso(s); });
-      }
+    // A legenda só existe depois que a API do player está de pé.
+    vslPlayer.addEventListener('api-ready', vslLegenda);
+    if (vslPlayer.captionsLanguages) { vslLegenda(); }
+
+    // O toque liga o som e volta ao início, para o lead ouvir o gancho
+    // desde a primeira palavra. Se o autoplay mudo tiver sido barrado
+    // pelo navegador, o mesmo toque também manda tocar.
+    var vslSom = $('#vslSom');
+    if (vslSom) {
+      vslSom.addEventListener('click', function () {
+        try {
+          // Ordem importa: o play() precisa sair ainda dentro do gesto do
+          // usuário, senão o iOS recusa. O retorno ao início vem depois.
+          vslPlayer.muted = false;
+          vslPlayer.volume = 1;
+          var p = vslPlayer.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch(function (err) { console.error('[vsl] play recusado pelo navegador:', err); });
+          }
+          vslPlayer.currentTime = 0;
+        } catch (err) {
+          console.error('[vsl] nao consegui ligar o som:', err);
+        }
+        vslLigouSom();
+      });
+    }
+
+    // Se alguém tirar o mudo pelo controle de volume do próprio player,
+    // em vez da camada, isso também conta como audiência.
+    vslPlayer.addEventListener('play', function () {
+      if (vslPlayer.muted === false) { vslLigouSom(); }
     });
   }
 

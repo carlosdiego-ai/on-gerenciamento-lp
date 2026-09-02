@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fast.wistia.net">
 <link rel="preconnect" href="https://embed-ssl.wistia.com" crossorigin>
 <link rel="preconnect" href="https://distillery.wistia.com">
-<link rel="stylesheet" href="assets/styles.css?v=106606c6">
+<link rel="stylesheet" href="assets/styles.css?v=b464259f">
 <script>document.documentElement.className += ' js';</script>
 
 <!-- ============================================================
@@ -198,16 +198,40 @@ src="https://www.facebook.com/tr?id=2072411560304254&amp;ev=PageView&amp;noscrip
     </div>
 
     <!-- ============================================================
-         VSL — hospedada no Wistia, media-id c3tgrzrn39
-         Duração 5min57s. Para trocar o vídeo basta mudar o media-id
-         nos dois lugares: no <wistia-player> e no <script> do embed
-         no fim do arquivo. A cor do player acompanha o dourado da marca.
+         VSL — Wistia, media-id c3tgrzrn39, 5min57s.
+         Para trocar o vídeo, mude o media-id em dois lugares: aqui e
+         no <script> do embed no fim do arquivo.
+
+         O player abre mudo e tocando e a camada .vsl__som cobre tudo
+         pedindo o toque. A legenda em português é ligada pelo app.js,
+         na propriedade captionsEnabled, porque este player não aceita
+         atributo para isso. Ao
+         tocar, o áudio liga e o vídeo volta ao início, para o lead não
+         perder o gancho dos primeiros segundos.
+
+         Os controles que tiram o visitante da página estão desligados:
+         menu de três pontos, tela cheia, e o copiar link e miniatura
+         do botão direito. Sobra a barra de progresso e o volume.
          ============================================================ -->
     <div class="vsl reveal reveal--zoom" id="vslBloco">
       <div class="vsl__frame" id="vsl">
         <wistia-player media-id="c3tgrzrn39"
                        aspect="1.7777777777777777"
-                       player-color="#D9B877"></wistia-player>
+                       player-color="#D9B877"
+                       autoplay="true"
+                       muted="true"
+                       settings-control="false"
+                       fullscreen-button="false"
+                       small-play-button="false"
+                       copy-link-and-thumbnail-enabled="false"></wistia-player>
+
+        <button class="vsl__som" id="vslSom" type="button">
+          <span class="vsl__som-icone" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+          </span>
+          <span class="vsl__som-texto">Seu vídeo já começou<b>Toque para ouvir</b></span>
+        </button>
+
         <span class="vsl__badge">Vídeo · 6 min</span>
       </div>
       <p class="vsl__caption">Assista antes de preencher. A conversa começa muito mais adiantada.</p>
@@ -634,6 +658,6 @@ src="https://www.facebook.com/tr?id=2072411560304254&amp;ev=PageView&amp;noscrip
 
 <script src="https://fast.wistia.com/player.js" async></script>
 <script src="https://fast.wistia.com/embed/c3tgrzrn39.js" async type="module"></script>
-<script src="assets/app.js?v=3c9f1e79"></script>
+<script src="assets/app.js?v=37f8c222"></script>
 </body>
 </html>

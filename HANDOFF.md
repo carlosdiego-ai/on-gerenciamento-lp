@@ -49,38 +49,38 @@ Validado com o `fbevents.js` trocado por um stub, para a fila do `fbq` ficar int
 
 ## 2. A VSL
 
-O vídeo está hospedado no **Wistia**, media-id `c3tgrzrn39`, com 5min57s. O player entra por web component, com a cor da marca:
+Hospedada no **Wistia**, media-id `c3tgrzrn39`, 5min57s. Para trocar o vídeo, mude o media-id em dois lugares: na tag `<wistia-player>` e no `<script src="https://fast.wistia.com/embed/{id}.js">` no fim do `index.html`.
 
-```html
-<wistia-player media-id="c3tgrzrn39" aspect="1.7777777777777777" player-color="#D9B877"></wistia-player>
-```
+### Abre mudo e pede o som
 
-Para trocar o vídeo, mude o media-id em dois lugares: na tag acima e no `<script src="https://fast.wistia.com/embed/{id}.js">` no fim do `index.html`.
+O player abre com `autoplay` e `muted`, e a camada `.vsl__som` cobre tudo com o ícone dourado pulsando e o texto "Seu vídeo já começou / Toque para ouvir". O toque liga o áudio e volta ao início, para o lead ouvir o gancho desde a primeira palavra.
 
-O `app.js` escuta o player e manda três eventos para o pixel: `VSL iniciada`, `VSL 50%` e `VSL concluida`. Cada um tem trava própria, porque a escuta acontece por dois caminhos ao mesmo tempo, os eventos do web component e a API clássica pelo `window._wq`. Se um caminho falhar o outro cobre, e nenhum evento sai duplicado.
+A ordem dentro do clique importa: `play()` sai **antes** do `currentTime = 0`, porque o iOS exige que o play aconteça ainda dentro do gesto do usuário. Inverter isso quebra no iPhone.
 
-O selo `Vídeo · 6 min` fica no canto superior esquerdo da moldura, não no inferior, porque embaixo ficam o cronômetro e a barra de controle do Wistia. Ele some quando o vídeo começa, e tem `pointer-events:none` para nunca roubar um clique do player.
+### Controles que tiram o visitante da página
 
-O CSS do antigo placeholder foi removido, junto com o `@keyframes pulso` que só ele usava.
+Desligados por atributo: `settings-control`, `fullscreen-button`, `small-play-button` e `copy-link-and-thumbnail-enabled`. Sobram a barra de progresso e o volume, que aparecem no hover.
 
-**Pendente no painel do Wistia:** o botão de play grande ainda é o retângulo arredondado padrão. Dá para trocar por um círculo em Customize, no painel do vídeo, sem mexer no código.
+### Duas coisas medidas neste player, e que contrariam o esperado
 
----
+1. **A legenda não liga por atributo.** `captions-visible-on-load` não faz nada aqui. Liga pela propriedade `captionsEnabled = true`, e só depois do evento `api-ready`.
+2. **Dos eventos, só `api-ready` dispara.** Nem `play`, nem `timeupdate`, nem `secondchange` chegam ao elemento. Por isso o progresso é lido de `currentTime` num `setInterval` de 2s, que só começa depois que o som liga e se encerra no fim do vídeo. A antiga rede de segurança pelo `window._wq` foi removida: ela nunca disparava, o `onReady` não é chamado com o web component.
 
-## 2. Correções de conteúdo feitas nesta versão
+O idioma da legenda vem como objeto, com `wistiaLanguageCode` (`por`) e `bcp47LanguageTag` (`pt`). Hoje só existe português, então o código só escolhe explicitamente quando houver mais de uma faixa.
 
-O formulário de entrada preenchido pelo Fernando corrigiu dados que estavam errados na versão anterior:
+### Eventos de audiência
 
-| Antes | Agora | Fonte |
-|---|---|---|
-| Fundada em 2020 | **Desde 2020**, atuando como ON. O CNPJ foi aberto em 2021 | Fernando, sócio, em 2026-08-18 |
-| Mais de 30 obras entregues | **Removido** | Número nunca foi confirmado |
-| Ana Flora Nalfal | **Ana Flora Naufal**, arquiteta e sócia. Sobrenome é Naufal, com u, nunca Nalfal | Fernando, sócio, em 2026-08-24 |
-| Equipe genérica | **Oliveira + Naufal**, origem do nome ON | Formulário de entrada |
-| Só residencial | **Residencial e comercial** de alto padrão | Formulário de entrada |
-| Adamantina e região | **Região oeste paulista** | Formulário de entrada |
+| Evento | Quando |
+|---|---|
+| `ViewContent` · VSL com som | Toque na camada, ou tirar o mudo pelo controle do player |
+| `ViewContent` · VSL 50% | Metade do vídeo, contada só depois do som ligado |
+| `ViewContent` · VSL concluida | Fim do vídeo |
 
-A frase "não competimos por volume, competimos por valor" e a origem do nome vieram direto das palavras do Fernando. São os dois argumentos mais fortes da página e nenhum concorrente da região pode copiar.
+**Autoplay mudo não dispara evento nenhum.** Se disparasse, o pixel receberia um `ViewContent` em toda visita e o dado não valeria nada.
+
+**Não confirmado em headless:** a retomada da reprodução depois do toque. O Chrome headless desta máquina não sobe o display link do macOS e não decodifica vídeo, então `paused` fica `true` mesmo sem o `play()` ser recusado. Conferir em aparelho real.
+
+**Pendente no painel do Wistia:** o botão de play grande ainda é o retângulo arredondado padrão. Dá para trocar por um círculo em Customize.
 
 ---
 
