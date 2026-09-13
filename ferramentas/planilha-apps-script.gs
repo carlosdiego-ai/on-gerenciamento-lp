@@ -2,19 +2,23 @@
  * Dashboard da ON — automação da planilha
  *
  * Cola este arquivo inteiro em Extensões > Apps Script, dentro da planilha
- * "Dashboard - ON Gerenciamento de Obras". Depois:
+ * "Dashboard - ON Gerenciamento de Obras", substituindo o que houver lá.
  *
- *   1. Rode a função configurar() uma vez. Ela pede autorização na primeira vez.
- *   2. Implantar > Nova implantação > Tipo: App da Web
- *        Executar como: Eu
- *        Quem pode acessar: Qualquer pessoa
- *   3. Copie a URL que termina em /exec e mande para a Croma.
+ *   1. Salve e rode a função configurar(). Na primeira vez o Google pede
+ *      autorização: Revisar permissões > sua conta > Avançado > Acessar.
+ *   2. O App da Web PRECISA estar com "Quem pode acessar: Qualquer pessoa".
+ *      Para mudar sem trocar a URL: Implantar > Gerenciar implantações >
+ *      lápis > Quem pode acessar: Qualquer pessoa > Implantar.
+ *      Com "Somente eu" ou "Qualquer pessoa com Conta do Google", o Google
+ *      devolve 401 para o site e nenhum lead chega.
  *
- * O que ela faz:
+ * O que ela faz, e pode rodar quantas vezes quiser:
  *   - Cria a aba "Respostas LP", onde cada envio do formulário vira uma linha.
  *   - Troca a coluna da etapa 1 de todos os meses por uma contagem automática
- *     dessa aba, dia a dia. Ninguém digita mais esse número.
- *   - Configura o painel para a ON e apaga os dados de teste que vieram do modelo.
+ *     dessa aba, dia a dia.
+ *
+ * O que ela NÃO faz: não mexe nos nomes do funil nem apaga nenhum valor.
+ * Nomes do funil e cliente ficam na aba CONFIG, preenchidos por quem usa.
  */
 
 const ABA_RESPOSTAS = 'Respostas LP';
@@ -24,17 +28,9 @@ const CABECALHO = [
   'Data e hora', 'Nome', 'WhatsApp', 'Cidade da obra', 'Projeto',
   'Previsão de início', 'Investimento', 'Página de origem', 'Status', 'Observações',
 ];
-const STATUS = ['Novo', 'Em contato', 'Reunião agendada', 'Análise realizada', 'Contrato fechado', 'Sem resposta', 'Descartado'];
 
-// Nomes do funil da ON. Dá para mudar depois direto na aba CONFIG.
-const PAINEL = {
-  'CLIENTE': 'ON Gerenciamento de Obras',
-  'ETAPA 1 DO FUNIL': 'Leads da LP',
-  'ETAPA 2 DO FUNIL': 'Reuniões Agendadas',
-  'ETAPA 3 DO FUNIL': 'Análises Realizadas',
-  'ETAPA 4 DO FUNIL': 'Contratos Fechados',
-  'MÉTRICA DE RECEITA': 'Valor Contratado',
-};
+// Acompanha o funil que está na CONFIG: Cadastros > Negociação > Proposta Feita > Vendas
+const STATUS = ['Novo', 'Em negociação', 'Proposta feita', 'Venda fechada', 'Sem resposta', 'Descartado'];
 
 /* ------------------------------------------------------------------------ */
 
@@ -43,17 +39,15 @@ function configurar() {
   ss.setSpreadsheetTimeZone(FUSO); // lead das 23h50 não pode cair no dia seguinte
 
   const aba = criarAbaRespostas_(ss);
-  const campos = preencherPainel_(ss);
   const meses = ligarContagemAutomatica_(ss);
 
   const msg = [
     'Aba "' + aba.getName() + '" pronta.',
-    'Painel configurado: ' + campos + ' campos.',
     'Contagem automática ligada em ' + meses.abas + ' meses (' + meses.dias + ' dias).',
-    'Dados de teste apagados: ' + meses.limpas + ' células.',
+    meses.abas === 12 ? 'Tudo certo.' : 'ATENÇÃO: eram esperados 12 meses. Veja o registro de execução.',
   ].join('\n');
   console.log(msg);
-  try { SpreadsheetApp.getUi().alert(msg); } catch (e) { /* rodando pelo editor sem UI */ }
+  try { SpreadsheetApp.getUi().alert(msg); } catch (e) { /* rodando sem interface */ }
 }
 
 function criarAbaRespostas_(ss) {
@@ -68,7 +62,7 @@ function criarAbaRespostas_(ss) {
   aba.getRange('C2:C').setNumberFormat('@');
 
   const validacao = SpreadsheetApp.newDataValidation()
-    .requireValueInList(STATUS, true).setAllowInvalid(false).build();
+    .requireValueInList(STATUS, true).setAllowInvalid(true).build();
   aba.getRange(2, 9, aba.getMaxRows() - 1, 1).setDataValidation(validacao);
 
   [150, 200, 140, 170, 160, 150, 170, 220, 150, 260]
@@ -76,22 +70,8 @@ function criarAbaRespostas_(ss) {
   return aba;
 }
 
-function preencherPainel_(ss) {
-  let feitos = 0;
-  Object.keys(PAINEL).forEach(function (rotulo) {
-    const celula = ss.createTextFinder(rotulo).matchEntireCell(true).findNext();
-    if (!celula) {
-      console.error('[painel] rótulo não encontrado na CONFIG:', rotulo);
-      return;
-    }
-    celula.offset(0, 1).setValue(PAINEL[rotulo]);
-    feitos++;
-  });
-  return feitos;
-}
-
 function ligarContagemAutomatica_(ss) {
-  const resultado = { abas: 0, dias: 0, limpas: 0 };
+  const resultado = { abas: 0, dias: 0 };
 
   ss.getSheets().forEach(function (aba) {
     if (aba.getName() === ABA_RESPOSTAS) return;
@@ -121,38 +101,10 @@ function ligarContagemAutomatica_(ss) {
       "=COUNTIFS('" + ABA_RESPOSTAS + "'!C1,\">=\"&RC[-1],'" + ABA_RESPOSTAS + "'!C1,\"<\"&(RC[-1]+1))"
     ).setBackground('#EFE7D6').setNote('Automático: vem da aba ' + ABA_RESPOSTAS + '. Não digite aqui.');
 
-    // Apaga só valores digitados (nunca fórmula) nas outras colunas amarelas
-    resultado.limpas += limparDigitados_(aba.getRange(ini, colData + 2, dias, 5));
-
-    // Investimento semanal: só as colunas SEM 1 a SEM 5
-    const inv = aba.createTextFinder('INVESTIMENTO').matchEntireCell(true).findNext();
-    const indic = aba.createTextFinder('INDICADOR').matchEntireCell(true).findNext();
-    if (inv && indic) {
-      const rotulos = aba.getRange(indic.getRow(), 1, 1, aba.getLastColumn()).getDisplayValues()[0];
-      rotulos.forEach(function (r, i) {
-        if (/^SEM\s*\d/i.test(r)) resultado.limpas += limparDigitados_(aba.getRange(inv.getRow(), i + 1));
-      });
-    }
-
     resultado.abas++;
     resultado.dias += dias;
   });
   return resultado;
-}
-
-function limparDigitados_(range) {
-  const formulas = range.getFormulas();
-  const valores = range.getValues();
-  let n = 0;
-  for (let r = 0; r < valores.length; r++) {
-    for (let c = 0; c < valores[r].length; c++) {
-      if (!formulas[r][c] && valores[r][c] !== '') {
-        range.getCell(r + 1, c + 1).clearContent();
-        n++;
-      }
-    }
-  }
-  return n;
 }
 
 /* ------------------------------------------------------------------------
@@ -178,9 +130,11 @@ function doPost(e) {
     const cache = CacheService.getScriptCache();
     const chave = 'lead_' + whats;
     if (cache.get(chave)) return resposta_({ ok: true, duplicado: true });
-    cache.put(chave, '1', 600);
 
-    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA_RESPOSTAS).appendRow([
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    // Se alguém esquecer de rodar configurar(), o lead não se perde
+    const aba = ss.getSheetByName(ABA_RESPOSTAS) || criarAbaRespostas_(ss);
+    aba.appendRow([
       new Date(),
       nome,
       formatarWhats_(whats),
@@ -192,6 +146,7 @@ function doPost(e) {
       'Novo',
       '',
     ]);
+    cache.put(chave, '1', 600); // só marca depois de gravar
     return resposta_({ ok: true });
   } catch (err) {
     console.error('[doPost] falhou:', err, e && e.postData && e.postData.contents);
@@ -201,7 +156,7 @@ function doPost(e) {
   }
 }
 
-// Abrir a URL /exec no navegador confirma que a implantação está no ar
+// Abrir a URL /exec no navegador confirma que a implantação está pública
 function doGet() {
   return resposta_({ ok: true, servico: 'Dashboard ON — Respostas LP' });
 }

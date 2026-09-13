@@ -14,7 +14,7 @@
     whatsapp: '5518000000000',            // PENDENTE: número real da ON
     // URL /exec do Apps Script da planilha "Dashboard - ON Gerenciamento de Obras".
     // Vazio = o lead vai só para o pixel e para o WhatsApp.
-    endpoint: '',
+    endpoint: 'https://script.google.com/macros/s/AKfycbxDuVYk9Jc6aAD0_LfP0AUrqU5cKirDwEVHIXhFzDnJAeh3YG2hEaUYZhiOYr_uPV7m/exec',
     reduzirMovimento: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
 
     /* -------------------------------------------------------------------

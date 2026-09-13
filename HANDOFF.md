@@ -374,4 +374,8 @@ Esquecer esse passo não quebra o site, mas faz visitantes antigos continuarem v
 - O script neutraliza texto que começa com `= + - @`, que viraria fórmula na planilha.
 - Envio repetido do mesmo WhatsApp em 10 minutos é ignorado.
 
-**Pendente:** o `endpoint` segue vazio até alguém implantar o script e passar a URL `/exec`. Enquanto isso, o lead continua indo para o pixel e para o WhatsApp, sem mudança.
+**URL ligada em 2026-09-13:** `CONFIG.endpoint` aponta para o App da Web implantado pelo Carlos.
+
+**Atenção à implantação:** o acesso precisa ser "Qualquer pessoa". Na primeira implantação ficou restrito e o Google devolvia `401` para o POST, com o GET indo para a tela de login. Para mudar sem trocar a URL: Implantar > Gerenciar implantações > lápis > Quem pode acessar.
+
+**O script não mexe na CONFIG.** O painel foi preenchido à mão pela Croma com Cadastros, Negociação, Proposta Feita e Vendas, e a primeira versão do script sobrescreveria isso. Também não apaga valor nenhum, então pode ser rodado de novo sem risco. O Status da aba `Respostas LP` segue esse mesmo funil.
