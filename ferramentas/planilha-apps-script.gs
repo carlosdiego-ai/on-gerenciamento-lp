@@ -44,7 +44,9 @@ function configurar() {
   const msg = [
     'Aba "' + aba.getName() + '" pronta.',
     'Contagem automática ligada em ' + meses.abas + ' meses (' + meses.dias + ' dias).',
-    meses.abas === 12 ? 'Tudo certo.' : 'ATENÇÃO: eram esperados 12 meses. Veja o registro de execução.',
+    meses.erros ? 'ERRO: ' + meses.erros + ' células ficaram com fórmula quebrada. Mande um print do registro de execução para a Croma.'
+      : meses.abas === 12 ? 'Tudo certo, sem nenhuma célula com erro.'
+      : 'ATENÇÃO: eram esperados 12 meses. Veja o registro de execução.',
   ].join('\n');
   console.log(msg);
   try { SpreadsheetApp.getUi().alert(msg); } catch (e) { /* rodando sem interface */ }
@@ -71,7 +73,7 @@ function criarAbaRespostas_(ss) {
 }
 
 function ligarContagemAutomatica_(ss) {
-  const resultado = { abas: 0, dias: 0 };
+  const resultado = { abas: 0, dias: 0, erros: 0 };
 
   ss.getSheets().forEach(function (aba) {
     if (aba.getName() === ABA_RESPOSTAS) return;
@@ -96,10 +98,28 @@ function ligarContagemAutomatica_(ss) {
       return;
     }
 
-    // Etapa 1: conta as linhas de Respostas LP daquele dia
-    aba.getRange(ini, colData + 1, dias, 1).setFormulaR1C1(
-      "=COUNTIFS('" + ABA_RESPOSTAS + "'!C1,\">=\"&RC[-1],'" + ABA_RESPOSTAS + "'!C1,\"<\"&(RC[-1]+1))"
-    ).setBackground('#EFE7D6').setNote('Automático: vem da aba ' + ABA_RESPOSTAS + '. Não digite aqui.');
+    // Etapa 1: conta as linhas de Respostas LP daquele dia.
+    // Notação A1 de propósito: em R1C1 a referência de coluna inteira
+    // ('Aba'!C1) não é interpretada pelo Sheets e vira #ERROR! em todo o painel.
+    const letra = aba.getRange(ini, colData).getA1Notation().replace(/\d+/g, '');
+    const col = "'" + ABA_RESPOSTAS + "'!$A:$A";
+    const formulas = [];
+    for (let r = ini; r < fim; r++) {
+      const dia = letra + r;
+      formulas.push(['=COUNTIFS(' + col + ',">="&' + dia + ',' + col + ',"<"&(' + dia + '+1))']);
+    }
+    const alvo = aba.getRange(ini, colData + 1, dias, 1);
+    alvo.setFormulas(formulas)
+      .setBackground('#EFE7D6')
+      .setNote('Automático: vem da aba ' + ABA_RESPOSTAS + '. Não digite aqui.');
+
+    // Confere na hora: se a fórmula quebrar, avisa em vez de deixar o painel com erro
+    SpreadsheetApp.flush();
+    const quebradas = alvo.getDisplayValues().filter(function (l) { return String(l[0]).charAt(0) === '#'; }).length;
+    if (quebradas) {
+      console.error('[meses] fórmula com erro em', aba.getName(), quebradas, 'células. Exemplo:', formulas[0][0]);
+      resultado.erros += quebradas;
+    }
 
     resultado.abas++;
     resultado.dias += dias;

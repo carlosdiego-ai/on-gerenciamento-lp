@@ -378,4 +378,8 @@ Esquecer esse passo não quebra o site, mas faz visitantes antigos continuarem v
 
 **Atenção à implantação:** o acesso precisa ser "Qualquer pessoa". Na primeira implantação ficou restrito e o Google devolvia `401` para o POST, com o GET indo para a tela de login. Para mudar sem trocar a URL: Implantar > Gerenciar implantações > lápis > Quem pode acessar.
 
+**Fórmula da contagem em notação A1, nunca R1C1.** A primeira versão usava `setFormulaR1C1` com `'Respostas LP'!C1` para a coluna inteira. O Sheets não interpreta isso e todas as células de Cadastros viraram `#ERROR!`, contaminando o total do mês e o dashboard anual. A versão atual monta `=COUNTIFS('Respostas LP'!$A:$A,">="&B62,'Respostas LP'!$A:$A,"<"&(B62+1))` linha a linha, validada no motor do Google com três leads de teste, incluindo um das 23h50, que caiu no dia certo. O `configurar()` confere as células logo após gravar e avisa se alguma ficar com erro.
+
+**Teste de ponta a ponta em 2026-09-13:** GET devolve `{"ok":true}`, POST grava a linha na aba, e a resposta final traz `access-control-allow-origin: *`, que o navegador exige. Para testar por `curl`, não use `-X POST` junto com `-L`: isso força POST também no redirecionamento e dá um `405` falso. Use só `--data`.
+
 **O script não mexe na CONFIG.** O painel foi preenchido à mão pela Croma com Cadastros, Negociação, Proposta Feita e Vendas, e a primeira versão do script sobrescreveria isso. Também não apaga valor nenhum, então pode ser rodado de novo sem risco. O Status da aba `Respostas LP` segue esse mesmo funil.
