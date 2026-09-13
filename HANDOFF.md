@@ -354,3 +354,24 @@ bash ferramentas/versionar-assets.sh
 Ele calcula o hash do conteúdo de `styles.css` e `app.js` e injeta na referência dentro do `index.html`. Se o conteúdo mudou, a URL muda e o navegador busca de novo sozinho. Se não mudou, nada acontece.
 
 Esquecer esse passo não quebra o site, mas faz visitantes antigos continuarem vendo a versão anterior do CSS e do JS.
+
+---
+
+## Planilha de acompanhamento e respostas da LP
+
+**Planilha:** `Dashboard - ON Gerenciamento de Obras - 2026-09`, na pasta da ON no Drive, ID `1GFRVAk5kH7EggGnalNqkKUOmrl4RWl4DB7SkTlA2PiE`. Cópia da planilha padrão da Croma, `Dashboard - Modelo` (`1lvmV1xEIFwCPxwmOz7dKIu_RE3fwhufllVxEqBpcl38`).
+
+**Automação:** `ferramentas/planilha-apps-script.gs`, colado em Extensões > Apps Script da planilha. A função `configurar()` roda uma vez e faz três coisas:
+
+1. Cria a aba `Respostas LP`, uma linha por envio, com coluna de Status em lista (Novo, Em contato, Reunião agendada, Análise realizada, Contrato fechado, Sem resposta, Descartado).
+2. Troca a coluna da etapa 1 de todos os meses por `COUNTIFS` sobre essa aba, dia a dia. A contagem é fórmula, não gatilho: recalcula sozinha e não quebra se o script parar.
+3. Configura o painel para a ON e apaga os dados de teste do modelo (vinham da Ótica Bom Pastor). Só apaga valor digitado, nunca fórmula.
+
+**Recebimento:** `doPost` implantado como App da Web. A LP envia para `CONFIG.endpoint` no `app.js`.
+
+- O corpo vai como `text/plain`. Com `application/json` o navegador dispara um preflight de CORS que o Apps Script não responde, e nenhum lead chegaria.
+- `keepalive: true` segura o envio se o lead sair da página logo após clicar.
+- O script neutraliza texto que começa com `= + - @`, que viraria fórmula na planilha.
+- Envio repetido do mesmo WhatsApp em 10 minutos é ignorado.
+
+**Pendente:** o `endpoint` segue vazio até alguém implantar o script e passar a URL `/exec`. Enquanto isso, o lead continua indo para o pixel e para o WhatsApp, sem mudança.

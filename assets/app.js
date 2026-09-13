@@ -12,7 +12,9 @@
     // WhatsApp de destino no formato internacional, só dígitos.
     // Celular brasileiro tem 13 dígitos: 55 + DDD + 9 + número.
     whatsapp: '5518000000000',            // PENDENTE: número real da ON
-    endpoint: '',                          // opcional: URL que recebe o lead por POST
+    // URL /exec do Apps Script da planilha "Dashboard - ON Gerenciamento de Obras".
+    // Vazio = o lead vai só para o pixel e para o WhatsApp.
+    endpoint: '',
     reduzirMovimento: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
 
     /* -------------------------------------------------------------------
@@ -649,12 +651,18 @@
     track('Lead', { content_name: 'Formulario LP', cidade: dados.cidade });
 
     // Envio ao backend quando o endpoint estiver configurado.
+    // text/plain de propósito: application/json dispara um preflight de CORS
+    // que o Apps Script não responde, e o lead nunca chegaria na planilha.
+    // keepalive segura o envio mesmo se o lead sair da página logo depois.
     if (CONFIG.endpoint) {
       fetch(CONFIG.endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
-      }).catch(function () { /* o lead já está no pixel e no WhatsApp */ });
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(dados),
+        keepalive: true
+      }).catch(function (err) {
+        console.error('[lead] nao chegou na planilha, segue no pixel e no WhatsApp:', err, dados);
+      });
     } else {
       console.info('[endpoint pendente] lead capturado:', dados);
     }
