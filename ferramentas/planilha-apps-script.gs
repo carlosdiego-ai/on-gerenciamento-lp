@@ -43,7 +43,8 @@ function configurar() {
 
   const msg = [
     'Aba "' + aba.getName() + '" pronta.',
-    'Contagem automática ligada em ' + meses.abas + ' meses (' + meses.dias + ' dias).',
+    'Contagem automática ligada em ' + meses.abas + ' meses (' + meses.dias + ' dias)' +
+      (meses.separador ? ', separador "' + meses.separador + '".' : '.'),
     meses.erros ? 'ERRO: ' + meses.erros + ' células ficaram com fórmula quebrada. Mande um print do registro de execução para a Croma.'
       : meses.abas === 12 ? 'Tudo certo, sem nenhuma célula com erro.'
       : 'ATENÇÃO: eram esperados 12 meses. Veja o registro de execução.',
@@ -73,7 +74,7 @@ function criarAbaRespostas_(ss) {
 }
 
 function ligarContagemAutomatica_(ss) {
-  const resultado = { abas: 0, dias: 0, erros: 0 };
+  const resultado = { abas: 0, dias: 0, erros: 0, separador: '' };
 
   ss.getSheets().forEach(function (aba) {
     if (aba.getName() === ABA_RESPOSTAS) return;
@@ -99,26 +100,41 @@ function ligarContagemAutomatica_(ss) {
     }
 
     // Etapa 1: conta as linhas de Respostas LP daquele dia.
-    // Notação A1 de propósito: em R1C1 a referência de coluna inteira
-    // ('Aba'!C1) não é interpretada pelo Sheets e vira #ERROR! em todo o painel.
+    //
+    // A fórmula entra como texto e quem interpreta é a planilha, no idioma
+    // dela. Em português do Brasil o separador de argumentos é ponto e
+    // vírgula; em inglês é vírgula. Com o separador errado, todas as células
+    // viram #ERROR! e o erro contamina o total do mês e o dashboard anual.
+    // Por isso tenta vírgula, confere, e se quebrar refaz com ponto e vírgula.
     const letra = aba.getRange(ini, colData).getA1Notation().replace(/\d+/g, '');
     const col = "'" + ABA_RESPOSTAS + "'!$A:$A";
-    const formulas = [];
-    for (let r = ini; r < fim; r++) {
-      const dia = letra + r;
-      formulas.push(['=COUNTIFS(' + col + ',">="&' + dia + ',' + col + ',"<"&(' + dia + '+1))']);
-    }
     const alvo = aba.getRange(ini, colData + 1, dias, 1);
-    alvo.setFormulas(formulas)
-      .setBackground('#EFE7D6')
+
+    const tentativa = function (sep) {
+      const formulas = [];
+      for (let r = ini; r < fim; r++) {
+        const dia = letra + r;
+        formulas.push(['=COUNTIFS(' + col + sep + '">="&' + dia + sep + col + sep + '"<"&(' + dia + '+1))']);
+      }
+      alvo.setFormulas(formulas);
+      SpreadsheetApp.flush();
+      const vistos = alvo.getDisplayValues();
+      const quebradas = vistos.filter(function (l) { return String(l[0]).charAt(0) === '#'; }).length;
+      return { sep: sep, quebradas: quebradas, exemplo: formulas[0][0], valor: vistos[0][0] };
+    };
+
+    let t = tentativa(',');
+    if (t.quebradas) t = tentativa(';');
+
+    alvo.setBackground('#EFE7D6')
       .setNote('Automático: vem da aba ' + ABA_RESPOSTAS + '. Não digite aqui.');
 
-    // Confere na hora: se a fórmula quebrar, avisa em vez de deixar o painel com erro
-    SpreadsheetApp.flush();
-    const quebradas = alvo.getDisplayValues().filter(function (l) { return String(l[0]).charAt(0) === '#'; }).length;
-    if (quebradas) {
-      console.error('[meses] fórmula com erro em', aba.getName(), quebradas, 'células. Exemplo:', formulas[0][0]);
-      resultado.erros += quebradas;
+    if (t.quebradas) {
+      console.error('[meses] fórmula com erro em', aba.getName(), t.quebradas, 'células com os dois separadores.',
+        'Mostra:', t.valor, 'Fórmula:', t.exemplo, 'Idioma da planilha:', ss.getSpreadsheetLocale());
+      resultado.erros += t.quebradas;
+    } else {
+      resultado.separador = t.sep;
     }
 
     resultado.abas++;

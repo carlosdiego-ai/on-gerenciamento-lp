@@ -378,7 +378,11 @@ Esquecer esse passo não quebra o site, mas faz visitantes antigos continuarem v
 
 **Atenção à implantação:** o acesso precisa ser "Qualquer pessoa". Na primeira implantação ficou restrito e o Google devolvia `401` para o POST, com o GET indo para a tela de login. Para mudar sem trocar a URL: Implantar > Gerenciar implantações > lápis > Quem pode acessar.
 
-**Fórmula da contagem em notação A1, nunca R1C1.** A primeira versão usava `setFormulaR1C1` com `'Respostas LP'!C1` para a coluna inteira. O Sheets não interpreta isso e todas as células de Cadastros viraram `#ERROR!`, contaminando o total do mês e o dashboard anual. A versão atual monta `=COUNTIFS('Respostas LP'!$A:$A,">="&B62,'Respostas LP'!$A:$A,"<"&(B62+1))` linha a linha, validada no motor do Google com três leads de teste, incluindo um das 23h50, que caiu no dia certo. O `configurar()` confere as células logo após gravar e avisa se alguma ficar com erro.
+**O separador da fórmula depende do idioma da planilha.** A planilha da ON está em português do Brasil, onde o separador de argumentos é ponto e vírgula. As duas primeiras versões do script gravavam a contagem com vírgula e todas as células de Cadastros viraram `#ERROR!`, contaminando o total do mês e o dashboard anual. A primeira suspeita foi a notação R1C1, e estava errada: a versão em A1 com vírgula quebrou igual.
+
+O script atual grava com vírgula, confere, e se quebrar regrava com ponto e vírgula, avisando qual funcionou. Serve para planilha em qualquer idioma.
+
+Como validar isso sem mexer na planilha do cliente: subir um CSV convertido para Sheets com as duas versões lado a lado. O CSV passa pelo mesmo interpretador de texto que o Apps Script usa. **Um xlsx não serve para esse teste**: ele guarda a fórmula no formato interno e a vírgula passa, dando falso positivo. Foi o que aconteceu na segunda tentativa.
 
 **Teste de ponta a ponta em 2026-09-13:** GET devolve `{"ok":true}`, POST grava a linha na aba, e a resposta final traz `access-control-allow-origin: *`, que o navegador exige. Para testar por `curl`, não use `-X POST` junto com `-L`: isso força POST também no redirecionamento e dá um `405` falso. Use só `--data`.
 
